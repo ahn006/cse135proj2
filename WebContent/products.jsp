@@ -8,6 +8,7 @@
 <%@ include file="conn.jsp" %>
 </head>
 <body>
+<h2>Products</h2>
 
 
 
@@ -36,14 +37,23 @@
                     // Create the prepared statement and use it to
                     // INSERT student values INTO the students table.
                     pstmt = conn
-                    .prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
+                    .prepareStatement("INSERT INTO products (name, sku, price) VALUES (?, ?, ?)");
 
 
                     pstmt.setString(1, request.getParameter("name"));
-                    pstmt.setString(2, request.getParameter("description"));
-                    //pstmt.setString(4, request.getParameter("last"));
+                    pstmt.setInt(2, Integer.parseInt(request.getParameter("sku")));
+                    pstmt.setDouble(3, Double.parseDouble(request.getParameter("price")));
                     int rowCount = pstmt.executeUpdate();
 
+                    PreparedStatement pstmt2 = conn.
+                    		prepareStatement("INSERT INTO classify (product, category) " +
+                    		"SELECT products.id, categories.id FROM products, categories " +
+                    		"WHERE categories.name = " + request.getParameter("category") + 
+                    		" AND products.name = " + request.getParameter("name"));
+                   
+                    int rowCount2 = pstmt2.executeUpdate();
+                    pstmt2 = null;
+                    
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
@@ -61,14 +71,14 @@
                     // Create the prepared statement and use it to
                     // UPDATE student values in the Students table.
                     pstmt = conn
-                        .prepareStatement("UPDATE categories SET name = ?, "
-                            + "description = ? WHERE id = ?");
+                        .prepareStatement("UPDATE products SET name = ?, "
+                            + "sku = ?, price = ? WHERE id = ?");
 
-                    //pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
+
                     pstmt.setString(1, request.getParameter("name"));
-                    pstmt.setString(2, request.getParameter("description"));
-                    //pstmt.setString(4, request.getParameter("last"));
-                    pstmt.setInt(3, Integer.parseInt(request.getParameter("id")));
+                    pstmt.setInt(2, Integer.parseInt(request.getParameter("sku")));
+                    pstmt.setDouble(3, Double.parseDouble(request.getParameter("price")));
+                    pstmt.setInt(4, Integer.parseInt(request.getParameter("id")));
                     int rowCount = pstmt.executeUpdate();
 
                     // Commit transaction
@@ -88,7 +98,7 @@
                     // Create the prepared statement and use it to
                     // DELETE students FROM the Students table.
                     pstmt = conn
-                        .prepareStatement("DELETE FROM categories WHERE id = ?");
+                        .prepareStatement("DELETE FROM products WHERE id = ?");
 
                     pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
                     int rowCount = pstmt.executeUpdate();
@@ -101,27 +111,44 @@
 
             <%-- -------- SELECT Statement Code -------- --%>
             <%
+            
+            	conn.setAutoCommit(false);
                 // Create the statement
                 Statement statement = conn.createStatement();
 
                 // Use the created statement to SELECT
                 // the student attributes FROM the Student table.
-                rs = statement.executeQuery("SELECT * FROM categories");
+                rs = statement.executeQuery("SELECT * FROM products");
+            
+                Statement statement2 = conn.createStatement();
+                ResultSet rs2 = statement2.executeQuery("SELECT * FROM categories");
+                
             %>
             
             <!-- Add an HTML table header row to format the results -->
             <table border="1">
             <tr>
                 <th>Name</th>
-                <th>Description</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Category</th>
             </tr>
 
             <tr>
-                <form action="categories.jsp" method="POST">
+                <form action="products.jsp" method="POST">
                     <input type="hidden" name="action" value="insert"/>
                     
                     <th><input value="" name="name" size="15"/></th>
-                    <th><input value="" name="description" size="15"/></th>
+                    <th><input value="" name="sku" size="15"/></th>
+                    <th><input value="" name="price" size="15"/></th>
+                    <th><select name="category">
+                    
+                    	<% while(rs2.next()) { %>
+                    	<option value="<%=rs2.getString("name") %>"><%= rs2.getString("name") %>
+                    	</option>
+
+                    	<% } %>
+					</select>                    	
                     <th><input type="submit" value="Insert"/></th>
                 </form>
             </tr>
@@ -133,7 +160,7 @@
             %>
 
             <tr>
-                <form action="categories.jsp" method="POST">
+                <form action="products.jsp" method="POST">
                     <input type="hidden" name="action" value="update"/>
                     <input type="hidden" name="id" value="<%=rs.getInt("id")%>"/>
 
@@ -147,14 +174,18 @@
 
                 <%-- Get the middle name --%>
                 <td>
-                    <input value="<%=rs.getString("description")%>" name="description" size="15"/>
+                    <input value="<%=rs.getInt("sku")%>" name="sku" size="15"/>
+                </td>
+
+                <td>
+                    <input value="<%=rs.getDouble("price")%>" name="price" size="15"/>
                 </td>
 
 
                 <%-- Button --%>
                 <td><input type="submit" value="Update"></td>
                 </form>
-                <form action="categories.jsp" method="POST">
+                <form action="products.jsp" method="POST">
                     <input type="hidden" name="action" value="delete"/>
                     <input type="hidden" value="<%=rs.getInt("id")%>" name="id"/>
                     <%-- Button --%>
@@ -164,16 +195,20 @@
 
             <%
                 }
+
             %>
 
             <%-- -------- Close Connection Code -------- --%>
             <%
                 // Close the ResultSet
                 rs.close();
-
+				rs2.close();
                 // Close the Statement
                 statement.close();
-
+				statement2.close();
+				
+				conn.setAutoCommit(true);
+				
                 // Close the Connection
                 conn.close();
             } catch (SQLException e) {
