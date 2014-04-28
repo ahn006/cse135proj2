@@ -19,7 +19,22 @@ CREATE TABLE users
 CREATE TABLE categories
 (
   id SERIAL PRIMARY KEY,
-  name text NOT NULL,
-  description text NOT NULL
+  name TEXT UNIQUE NOT NULL,
+  description TEXT NOT NULL
+);
+
+CREATE TABLE products
+(
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  sku INTEGER UNIQUE NOT NULL,
+  price DECIMAL(18,2) NOT NULL CHECK (price >= 0)
+);
+
+CREATE TABLE classify
+(
+  id SERIAL PRIMARY KEY,
+  product INTEGER REFERENCES products (ID) NOT NULL,
+  category INTEGER REFERENCES categories (ID) NOT NULL
 );
 

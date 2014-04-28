@@ -4,11 +4,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Categories</title>
+<title>Products</title>
 <%@ include file="conn.jsp" %>
 </head>
 <body>
-<h2>Categories</h2>
+
+
+
 <table>
 
     <tr>
@@ -213,6 +215,12 @@
 
 
 </table>
+
+
+
+
+
+
 
 
 
