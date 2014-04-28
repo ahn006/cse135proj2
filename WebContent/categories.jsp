@@ -5,32 +5,21 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Categories</title>
+<%@ include file="conn.jsp" %>
 </head>
 <body>
+
 <table>
+
     <tr>
         <td valign="top">
             <%-- -------- Include menu HTML code -------- --%>
             <!--  jsp:include page="/menu.html" / -->
         </td>
         <td>
-            <%-- Import the java.sql package --%>
-            <%@ page import="java.sql.*"%>
-            <%-- -------- Open Connection Code -------- --%>
             <%
-            
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            
+     
             try {
-                // Registering Postgresql JDBC driver with the DriverManager
-                Class.forName("org.postgresql.Driver");
-
-                // Open a connection to the database using DriverManager
-                conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost/cse135?" +
-                    "user=postgres&password=admin");
             %>
             
             <%-- -------- INSERT Code -------- --%>
@@ -45,11 +34,11 @@
                     // Create the prepared statement and use it to
                     // INSERT student values INTO the students table.
                     pstmt = conn
-                    .prepareStatement("INSERT INTO categories (id, name, description) VALUES (?, ?, ?)");
+                    .prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
 
-                    pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
-                    pstmt.setString(2, request.getParameter("name"));
-                    pstmt.setString(3, request.getParameter("description"));
+
+                    pstmt.setString(1, request.getParameter("name"));
+                    pstmt.setString(2, request.getParameter("description"));
                     //pstmt.setString(4, request.getParameter("last"));
                     int rowCount = pstmt.executeUpdate();
 
@@ -121,13 +110,12 @@
             <!-- Add an HTML table header row to format the results -->
             <table border="1">
             <tr>
-                <th>ID</th>
                 <th>Name</th>
                 <th>Description</th>
             </tr>
 
             <tr>
-                <form action="/categories.jsp" method="POST">
+                <form action="categories.jsp" method="POST">
                     <input type="hidden" name="action" value="insert"/>
                     <th>&nbsp;</th>
                     <th><input value="" name="name" size="15"/></th>
@@ -147,10 +135,7 @@
                     <input type="hidden" name="action" value="update"/>
                     <input type="hidden" name="id" value="<%=rs.getInt("id")%>"/>
 
-                <%-- Get the id --%>
-                <td>
-                    <%=rs.getInt("id")%>
-                </td>
+               
 
 
                 <%-- Get the first name --%>
@@ -222,6 +207,14 @@
         </table>
         </td>
     </tr>
+
+
+
+
+
 </table>
+
+
+
 </body>
 </html>
