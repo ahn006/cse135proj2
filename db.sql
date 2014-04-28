@@ -15,3 +15,11 @@ CREATE TABLE users
   state text NOT NULL,
   CONSTRAINT id PRIMARY KEY (id)
 );
+
+CREATE TABLE categories
+(
+  id SERIAL PRIMARY KEY,
+  name text NOT NULL,
+  description text NOT NULL
+);
+
