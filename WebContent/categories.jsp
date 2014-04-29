@@ -13,6 +13,7 @@
 	<tr>
 	<td><h2>Categories</h2></td>
 	<td><a href="products.jsp">Products</a></td>
+	</td><p>Hello <%=session.getAttribute("name") %></p></td>
 	</tr>
 </table>
 

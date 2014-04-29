@@ -19,6 +19,7 @@
 		<form method="post" action="products.jsp">
 			<input type="text" name="search" placeholder="Search products" />
 		</form>
+	</td><p>Hello <%=session.getAttribute("name") %></p>
 	</td>
 	</tr>
 </table>
