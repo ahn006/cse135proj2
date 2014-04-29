@@ -34,13 +34,29 @@
 
             rs = pstmt.executeQuery();
             
+            %> 
+            <ul>
+            <li>
+            	<form action="products.jsp" method="post">
+                <input type="hidden" name="filtercategory" value="All Products"/>
+            	<input type="submit" value="All Products" />
+            	</form>
+            </li>
+            
+            <%
+            
             while( rs.next() ) {
-            	%><tr>
-            		<form action="products.jsp" method="post"></form>
-   					<input type="submit" name="<%= rs.getString("name") %>category" 
-   					value="<%= rs.getString("name") %>" />	
-            	</tr><%
+            	%><li>
+            		<form action="products.jsp" method="post">
+                   	<input type="hidden" name="filtercategory" value="<%=rs.getString("name")%>"/>
+   					<input type="submit" value="<%= rs.getString("name") %>" />
+   					</form>	
+            	</li><%
             }
+            
+            %> 
+            </ul>
+            <%
             
             conn.setAutoCommit(true);
         	
@@ -165,15 +181,32 @@
                 // Create the statement
                 Statement statement = conn.createStatement();
 
-                // This first resultset is for setting up the update entries
-                rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
-                + "FROM products, categories, classify " + 
-                "WHERE classify.product = products.id AND classify.category = categories.id");
-            
-                		
-                // This second resultset is for populating the dropdown menus of category
                 Statement statement2 = conn.createStatement();
                 ResultSet rs2 = statement2.executeQuery("SELECT * FROM categories");
+                
+                
+                
+                // This first resultset is for setting up the update entries
+                if( request.getParameter("filtercategory") == null ||
+              		request.getParameter("filtercategory").equals("All Products")) {
+	                rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
+	                + "FROM products, categories, classify " + 
+	                "WHERE classify.product = products.id AND classify.category = categories.id");
+                }
+                else {
+	                while( rs2.next() ) {
+	                	if( request.getParameter("filtercategory").equals(rs2.getString("name"))) {
+	                		rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
+	           	                + "FROM products, categories, classify " + 
+	           	                "WHERE categories.name = '" + rs2.getString("name") + "'" +
+	           	                "AND classify.product = products.id AND classify.category = " +
+	           	                "categories.id");
+	                	}
+	                }
+                }		
+                // This second resultset is for populating the dropdown menus of category
+                statement2 = conn.createStatement();
+                rs2 = statement2.executeQuery("SELECT * FROM categories");
                 
             %>
             
