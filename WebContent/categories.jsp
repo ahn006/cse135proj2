@@ -25,10 +25,7 @@
 <table>
 
     <tr>
-        <td valign="top">
-            <%-- -------- Include menu HTML code -------- --%>
-            <!--  jsp:include page="/menu.html" / -->
-        </td>
+
         <td>
             <%
      
@@ -44,15 +41,13 @@
                     // Begin transaction
                     conn.setAutoCommit(false);
 
-                    // Create the prepared statement and use it to
-                    // INSERT student values INTO the students table.
+					// inserting into the categories table
                     pstmt = conn
                     .prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
 
 
                     pstmt.setString(1, request.getParameter("name"));
                     pstmt.setString(2, request.getParameter("description"));
-                    //pstmt.setString(4, request.getParameter("last"));
                     int rowCount = pstmt.executeUpdate();
 
                     // Commit transaction
@@ -69,16 +64,14 @@
                     // Begin transaction
                     conn.setAutoCommit(false);
 
-                    // Create the prepared statement and use it to
-                    // UPDATE student values in the Students table.
+					// updating the categories table
                     pstmt = conn
                         .prepareStatement("UPDATE categories SET name = ?, "
                             + "description = ? WHERE id = ?");
 
-                    //pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
+
                     pstmt.setString(1, request.getParameter("name"));
                     pstmt.setString(2, request.getParameter("description"));
-                    //pstmt.setString(4, request.getParameter("last"));
                     pstmt.setInt(3, Integer.parseInt(request.getParameter("id")));
                     int rowCount = pstmt.executeUpdate();
 
@@ -98,13 +91,12 @@
                 // Check if a delete is requested
                 if (action != null && action.equals("delete")) {
 
-                    // Begin transaction
-                    //conn.setAutoCommit(false);
-
                     
                     conn.setAutoCommit(false);
 
-		            
+		            // This part is to determine if any products are linked to the category.
+		            // If none are linked, it can be deleted. If there are linked products, 
+		            // the category is not allowed to be deleted
 		            PreparedStatement pstmt2 = conn.
 		            prepareStatement( "SELECT categories.id FROM categories WHERE EXISTS" +
 		            " (SELECT classify.* FROM classify WHERE classify.category = categories.id)");
@@ -123,8 +115,7 @@
 
                     
                     
-                    // Create the prepared statement and use it to
-                    // DELETE students FROM the Students table.
+					// Delete from the category table if no products refer to it
                     if( canDelete ) {
 	                    pstmt = conn
 	                        .prepareStatement("DELETE FROM categories WHERE id = ?");
@@ -147,8 +138,7 @@
                 // Create the statement
                 Statement statement = conn.createStatement();
 
-                // Use the created statement to SELECT
-                // the student attributes FROM the Student table.
+				// select all categories
                 rs = statement.executeQuery("SELECT * FROM categories");
             %>
             
@@ -201,7 +191,10 @@
                     <input type="hidden" value="<%=rs.getInt("id")%>" name="id"/>
                     <%-- Button --%>
                     
-                <% PreparedStatement pstmt2 = conn.
+                <% 
+                
+                // This part hides the delete button if it's not allowed to be deleted
+                PreparedStatement pstmt2 = conn.
                 prepareStatement( "SELECT categories.id FROM categories WHERE EXISTS" +
                 " (SELECT classify.* FROM classify WHERE classify.category = categories.id)");
                 ResultSet rs2 = pstmt2.executeQuery();

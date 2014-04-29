@@ -26,6 +26,7 @@ if (!(request.getParameter("name") == null)) {
         if (rs.getString("type").equals("customer")) {
             session.setAttribute("name", request.getParameter("name"));
             session.setAttribute("group", "customer");
+            response.sendRedirect("browse.jsp");
         }
     }
 }

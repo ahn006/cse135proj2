@@ -51,9 +51,6 @@
 
             rs = pstmt.executeQuery();
             String category = (String)(session.getAttribute("currentcategory"));
-            //if( request.getParameter("category") != null) {
-            	//category = //"'" + request.getParameter("category") + "'";
-            //}
             
             %> 
 
@@ -284,12 +281,12 @@
                
 
 
-                <%-- Get the first name --%>
+      
                 <td>
                     <input value="<%=rs.getString("name")%>" name="name" size="15"/>
                 </td>
 
-                <%-- Get the middle name --%>
+       
                 <td>
                     <input value="<%=rs.getInt("sku")%>" name="sku" size="15"/>
                 </td>
