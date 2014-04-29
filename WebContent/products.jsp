@@ -48,8 +48,8 @@
                     PreparedStatement pstmt2 = conn.
                     		prepareStatement("INSERT INTO classify (product, category) " +
                     		"SELECT products.id, categories.id FROM products, categories " +
-                    		"WHERE categories.name = " + request.getParameter("category") + 
-                    		" AND products.name = " + request.getParameter("name"));
+                    		"WHERE categories.name = '" + request.getParameter("category") + 
+                    		"' AND products.name = '" + request.getParameter("name") + "'");
                    
                     int rowCount2 = pstmt2.executeUpdate();
                     pstmt2 = null;
@@ -81,6 +81,8 @@
                     pstmt.setInt(4, Integer.parseInt(request.getParameter("id")));
                     int rowCount = pstmt.executeUpdate();
 
+                    
+                    
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
@@ -95,6 +97,13 @@
                     // Begin transaction
                     conn.setAutoCommit(false);
 
+                    PreparedStatement pstmt2 = conn.prepareStatement("DELETE FROM classify WHERE product = ?");
+                    pstmt2.setInt(1, Integer.parseInt(request.getParameter("id")));
+                    int rowCount2 = pstmt2.executeUpdate();
+         
+                    pstmt2 = null;
+
+                    
                     // Create the prepared statement and use it to
                     // DELETE students FROM the Students table.
                     pstmt = conn
@@ -103,6 +112,7 @@
                     pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
                     int rowCount = pstmt.executeUpdate();
 
+                                        
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
@@ -118,7 +128,9 @@
 
                 // Use the created statement to SELECT
                 // the student attributes FROM the Student table.
-                rs = statement.executeQuery("SELECT * FROM products");
+                rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
+                + "FROM products, categories, classify " + 
+                "WHERE classify.product = products.id AND classify.category = categories.id");
             
                 Statement statement2 = conn.createStatement();
                 ResultSet rs2 = statement2.executeQuery("SELECT * FROM categories");
@@ -142,19 +154,20 @@
                     <th><input value="" name="sku" size="15"/></th>
                     <th><input value="" name="price" size="15"/></th>
                     <th><select name="category">
-                    
+                    	<option />
                     	<% while(rs2.next()) { %>
                     	<option value="<%=rs2.getString("name") %>"><%= rs2.getString("name") %>
                     	</option>
 
                     	<% } %>
-					</select>                    	
+					</select></th>                   	
                     <th><input type="submit" value="Insert"/></th>
                 </form>
             </tr>
 
             <%-- -------- Iteration Code -------- --%>
             <%
+            
                 // Iterate over the ResultSet
                 while (rs.next()) {
             %>
@@ -180,7 +193,23 @@
                 <td>
                     <input value="<%=rs.getDouble("price")%>" name="price" size="15"/>
                 </td>
+				<td>
+					<select name="category"> 
+						<option value="<%=rs.getString("categoryName")%>"><%=rs.getString("categoryName") %></option>
+						
+						<% 
+						
+						rs2 = statement2.executeQuery("SELECT * FROM categories WHERE categories.name != '"
+						+ rs.getString("categoryName") + "'");
+						
+						while(rs2.next()) { %>
+                    	<option value="<%=rs2.getString("name") %>"><%= rs2.getString("name") %>
+                    	</option>
 
+                    	<% } %>
+						
+					</select>
+				</td>
 
                 <%-- Button --%>
                 <td><input type="submit" value="Update"></td>
