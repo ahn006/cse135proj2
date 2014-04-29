@@ -9,7 +9,7 @@ CREATE DATABASE cseproject
 CREATE TABLE users
 (
   id serial NOT NULL,
-  username text NOT NULL,
+  username text UNIQUE NOT NULL,
   age integer NOT NULL,
   type text NOT NULL,
   state text NOT NULL,
