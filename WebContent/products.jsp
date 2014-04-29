@@ -8,16 +8,48 @@
 <%@ include file="conn.jsp" %>
 </head>
 <body>
-<h2>Products</h2>
 
 
+<table>
+	<tr>
+	<td><h2>Products</h2></td>
+	<td><a href="categories.jsp">Categories</a></td>
+	</tr>
+</table>
+
+
+<% boolean insertSuccess = false; %>
 
 <table>
 
     <tr>
         <td valign="top">
-            <%-- -------- Include menu HTML code -------- --%>
-            <!--  jsp:include page="/menu.html" / -->
+        	<% 
+        	conn.setAutoCommit(false);
+
+			// This first prepared statement inserts the input values into the products
+			// table
+            pstmt = conn
+            .prepareStatement("SELECT * from categories");
+
+            rs = pstmt.executeQuery();
+            
+            while( rs.next() ) {
+            	%><tr>
+            		<form action="products.jsp" method="post"></form>
+   					<input type="submit" name="<%= rs.getString("name") %>category" 
+   					value="<%= rs.getString("name") %>" />	
+            	</tr><%
+            }
+            
+            conn.setAutoCommit(true);
+        	
+            rs.close();
+            rs = null;
+            pstmt.close();
+            pstmt = null;
+            
+        	%>
         </td>
         <td>
             <%
@@ -31,11 +63,11 @@
                 // Check if an insertion is requested
                 if (action != null && action.equals("insert")) {
 
-                    // Begin transaction
+                 
                     conn.setAutoCommit(false);
 
-                    // Create the prepared statement and use it to
-                    // INSERT student values INTO the students table.
+					// This first prepared statement inserts the input values into the products
+					// table
                     pstmt = conn
                     .prepareStatement("INSERT INTO products (name, sku, price) VALUES (?, ?, ?)");
 
@@ -45,6 +77,10 @@
                     pstmt.setDouble(3, Double.parseDouble(request.getParameter("price")));
                     int rowCount = pstmt.executeUpdate();
 
+                    
+                    // This second prepared Statement uses the category input value to insert values
+                    // into the classify table (which is the relation that links the category table
+                    // to the products table)
                     PreparedStatement pstmt2 = conn.
                     		prepareStatement("INSERT INTO classify (product, category) " +
                     		"SELECT products.id, categories.id FROM products, categories " +
@@ -68,8 +104,8 @@
                     // Begin transaction
                     conn.setAutoCommit(false);
 
-                    // Create the prepared statement and use it to
-                    // UPDATE student values in the Students table.
+                    // This updates the products table; the classify/categories tables dont need
+                    // to be updated
                     pstmt = conn
                         .prepareStatement("UPDATE products SET name = ?, "
                             + "sku = ?, price = ? WHERE id = ?");
@@ -86,6 +122,8 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
+                    
+                    insertSuccess = true;
                 }
             %>
             
@@ -94,7 +132,9 @@
                 // Check if a delete is requested
                 if (action != null && action.equals("delete")) {
 
-                    // Begin transaction
+                    // This statement deletes from the classify table first because otherwise 
+                    // deleting from the products table will make the classify table have entries
+                    // that reference null entries
                     conn.setAutoCommit(false);
 
                     PreparedStatement pstmt2 = conn.prepareStatement("DELETE FROM classify WHERE product = ?");
@@ -104,8 +144,7 @@
                     pstmt2 = null;
 
                     
-                    // Create the prepared statement and use it to
-                    // DELETE students FROM the Students table.
+                    // This statement deletes from the products table
                     pstmt = conn
                         .prepareStatement("DELETE FROM products WHERE id = ?");
 
@@ -126,12 +165,13 @@
                 // Create the statement
                 Statement statement = conn.createStatement();
 
-                // Use the created statement to SELECT
-                // the student attributes FROM the Student table.
+                // This first resultset is for setting up the update entries
                 rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
                 + "FROM products, categories, classify " + 
                 "WHERE classify.product = products.id AND classify.category = categories.id");
             
+                		
+                // This second resultset is for populating the dropdown menus of category
                 Statement statement2 = conn.createStatement();
                 ResultSet rs2 = statement2.executeQuery("SELECT * FROM categories");
                 
@@ -282,7 +322,10 @@
 
 
 
-
+<% 	if( insertSuccess ) {
+		%>Product was successfully inserted<%
+	}
+%>
 
 
 

@@ -8,7 +8,16 @@
 <%@ include file="conn.jsp" %>
 </head>
 <body>
-<h2>Categories</h2>
+
+<table>
+	<tr>
+	<td><h2>Categories</h2></td>
+	<td><a href="products.jsp">Products</a></td>
+	</tr>
+</table>
+
+<%        boolean deleteError = false; %>
+
 <table>
 
     <tr>
@@ -77,22 +86,54 @@
             
             <%-- -------- DELETE Code -------- --%>
             <%
+
+
+
+            
+            
                 // Check if a delete is requested
                 if (action != null && action.equals("delete")) {
 
                     // Begin transaction
+                    //conn.setAutoCommit(false);
+
+                    
                     conn.setAutoCommit(false);
 
+		            
+		            PreparedStatement pstmt2 = conn.
+		            prepareStatement( "SELECT categories.id FROM categories WHERE EXISTS" +
+		            " (SELECT classify.* FROM classify WHERE classify.category = categories.id)");
+		            ResultSet rs2 = pstmt2.executeQuery();
+		            boolean canDelete = true;
+		            while(rs2.next()) {
+		            	if( rs2.getInt("id") == Integer.parseInt(request.getParameter("id")) ) {
+		            		canDelete = false;
+		            	}
+		            }
+		            rs2.close();
+		            rs2 = null;
+		            pstmt2.close();
+		            pstmt2 = null;
+
+
+                    
+                    
                     // Create the prepared statement and use it to
                     // DELETE students FROM the Students table.
-                    pstmt = conn
-                        .prepareStatement("DELETE FROM categories WHERE id = ?");
-
-                    pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
-                    int rowCount = pstmt.executeUpdate();
-
-                    // Commit transaction
-                    conn.commit();
+                    if( canDelete ) {
+	                    pstmt = conn
+	                        .prepareStatement("DELETE FROM categories WHERE id = ?");
+	
+	                    pstmt.setInt(1, Integer.parseInt(request.getParameter("id")));
+	                    int rowCount = pstmt.executeUpdate();
+	
+	                    // Commit transaction
+	                    conn.commit();
+                    }
+                    else {
+                    	deleteError = true;
+                    }
                     conn.setAutoCommit(true);
                 }
             %>
@@ -126,6 +167,7 @@
 
             <%-- -------- Iteration Code -------- --%>
             <%
+            	conn.setAutoCommit(false);
                 // Iterate over the ResultSet
                 while (rs.next()) {
             %>
@@ -138,12 +180,10 @@
                
 
 
-                <%-- Get the first name --%>
                 <td>
                     <input value="<%=rs.getString("name")%>" name="name" size="15"/>
                 </td>
 
-                <%-- Get the middle name --%>
                 <td>
                     <input value="<%=rs.getString("description")%>" name="description" size="15"/>
                 </td>
@@ -156,7 +196,27 @@
                     <input type="hidden" name="action" value="delete"/>
                     <input type="hidden" value="<%=rs.getInt("id")%>" name="id"/>
                     <%-- Button --%>
-                <td><input type="submit" value="Delete"/></td>
+                    
+                <% PreparedStatement pstmt2 = conn.
+                prepareStatement( "SELECT categories.id FROM categories WHERE EXISTS" +
+                " (SELECT classify.* FROM classify WHERE classify.category = categories.id)");
+                ResultSet rs2 = pstmt2.executeQuery();
+                boolean canDelete = true;
+                while(rs2.next()) {
+                	if( rs2.getInt("id") == rs.getInt("id") ) {
+                		canDelete = false;
+                	}
+                }
+                if( canDelete ) { %>
+                	<td><input type="submit" value="Delete"/></td>
+              <%}
+                rs2.close();
+                rs2 = null;
+                pstmt2.close();
+                pstmt2 = null;
+            	conn.setAutoCommit(true);
+
+              %> 
                 </form>
             </tr>
 
@@ -174,6 +234,7 @@
 
                 // Close the Connection
                 conn.close();
+               
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
@@ -214,6 +275,10 @@
 
 </table>
 
+<% if( deleteError ) {
+		%>Category could not be deleted as there are still products attached to it<%
+	}
+%>
 
 
 </body>
