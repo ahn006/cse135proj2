@@ -16,7 +16,10 @@
 	</tr>
 </table>
 
-<%        boolean deleteError = false; %>
+<%        boolean deleteError = false; 
+		boolean insertError = false;
+		boolean updateError = false;
+%>
 
 <table>
 
@@ -240,6 +243,7 @@
                 // Wrap the SQL exception in a runtime exception to propagate
                 // it upwards
                 throw new RuntimeException(e);
+                //error = true;
             }
             finally {
                 // Release resources in a finally block in reverse-order of
@@ -278,6 +282,12 @@
 <% if( deleteError ) {
 		%>Category could not be deleted as there are still products attached to it<%
 	}
+if( insertError ) {
+	%>Category could not be successfully inserted<%
+}
+if( updateError ) {
+	%>Category could not be updated successfully<%
+}
 %>
 
 

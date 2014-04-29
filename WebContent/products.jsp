@@ -24,7 +24,17 @@
 </table>
 
 
-<% boolean insertSuccess = false; %>
+<% boolean insertSuccess = false; 
+	if( request.getParameter("filtercategory") != null) {
+		if( request.getParameter("filtercategory").equals("All Products") ) {
+			session.setAttribute("currentcategory", "categories.name");
+		}
+		else {
+			session.setAttribute("currentcategory", "'" + request.getParameter("filtercategory") + "'");
+		}
+	}
+
+%>
 
 <table>
 
@@ -39,8 +49,13 @@
             .prepareStatement("SELECT * from categories");
 
             rs = pstmt.executeQuery();
+            String category = (String)(session.getAttribute("currentcategory"));
+            //if( request.getParameter("category") != null) {
+            	//category = //"'" + request.getParameter("category") + "'";
+            //}
             
             %> 
+
             <ul>
             <li>
             	<form action="products.jsp" method="post">
@@ -107,7 +122,7 @@
                     		prepareStatement("INSERT INTO classify (product, category) " +
                     		"SELECT products.id, categories.id FROM products, categories " +
                     		"WHERE categories.name = '" + request.getParameter("category") + 
-                    		"' AND products.name = '" + request.getParameter("name") + "'");
+                    		"' AND products.sku = " + request.getParameter("sku"));
                    
                     int rowCount2 = pstmt2.executeUpdate();
                     pstmt2 = null;
@@ -196,9 +211,11 @@
                 
                 if( request.getParameter("search") != null) {
     	                rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
-    	                + "FROM products, categories, classify WHERE substring(products.name from '" + 
-    	                request.getParameter("search") + "') = '" + request.getParameter("search") + 
-    	                "' AND classify.product = products.id AND classify.category = categories.id");
+    	                + "FROM products, categories, classify WHERE substring(lower(products.name) from '" + 
+    	                request.getParameter("search").toLowerCase() + "') = '" + 
+    	                request.getParameter("search").toLowerCase() + "' AND categories.name = " +
+    	                category +
+    	                " AND classify.product = products.id AND classify.category = categories.id");
                 }
                 else if( request.getParameter("filtercategory") == null ||
               		request.getParameter("filtercategory").equals("All Products")) {
