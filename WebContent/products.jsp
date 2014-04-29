@@ -14,6 +14,12 @@
 	<tr>
 	<td><h2>Products</h2></td>
 	<td><a href="categories.jsp">Categories</a></td>
+	
+	<td>
+		<form method="post" action="products.jsp">
+			<input type="text" name="search" placeholder="Search products" />
+		</form>
+	</td>
 	</tr>
 </table>
 
@@ -187,7 +193,14 @@
                 
                 
                 // This first resultset is for setting up the update entries
-                if( request.getParameter("filtercategory") == null ||
+                
+                if( request.getParameter("search") != null) {
+    	                rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
+    	                + "FROM products, categories, classify WHERE substring(products.name from '" + 
+    	                request.getParameter("search") + "') = '" + request.getParameter("search") + 
+    	                "' AND classify.product = products.id AND classify.category = categories.id");
+                }
+                else if( request.getParameter("filtercategory") == null ||
               		request.getParameter("filtercategory").equals("All Products")) {
 	                rs = statement.executeQuery("SELECT products.*, categories.name as categoryName "
 	                + "FROM products, categories, classify " + 
