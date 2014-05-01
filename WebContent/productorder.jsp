@@ -10,29 +10,44 @@
 
 </head>
 <body>
-	<%
-	    //to check random landing on pages. Checks if the user is logged in or not
-	    if (session.getAttribute("name") == null) {
-	%>
-	<p>User Not logged In</p>
-	<%
-	    } else {
-	%>
-
-	<p>
-		Hello
-		<%=session.getAttribute("name")%></p>
-
-	<a href="/CSE135Project/checkout.jsp">Buy Shopping Cart</a>
-
-
-	<%
-	    //check if user is customer 
-	        //the product from product browsing page,ask for qty textbox, submit button (redirects to browsing page)
-
-	        //display what all exists from table cart
-
-	    }
-	%>
+<%@include file="header.jsp"%>
+<%
+if (request.getParameter("product") == null ) {
+    %> 
+    No product selected. Return to <a href="browse.jsp">Product Browsing</a>
+    <%
+}
+else if ( session.getAttribute("name") == null ) { 
+    %>
+    You need to be logged in to order items. Please <a href="login.jsp">login</a>
+    <%
+}
+else {
+    try {
+    Integer product = Integer.parseInt(request.getParameter("product"));
+    pstmt = conn.prepareStatement("SELECT name, price, sku FROM products WHERE id =?");
+    pstmt.setInt(1, product);
+    rs = pstmt.executeQuery();
+    while(rs.next()) {
+        %>
+        <form action = "cart.jsp" method="POST">
+            <input type="hidden" name="action" value="add" />
+            <input type="hidden" name="sku" value="<%= rs.getInt("sku") %>" />
+            <label for="product">Product Name; </label>
+            <input type="text" name="product" value="<%= rs.getString("name") %>" readonly />
+            <label for="price">Price: $</label>
+            <input type="text" name="price" value="<%= rs.getInt("price") %>" readonly />
+            <label for="quantity">Enter quantity:</label>
+            <input type="text" name="quantity" value="1"/>
+            <input type="submit" value="Add to cart" />
+        </form>
+        <%
+    }
+    }
+    catch(SQLException e) {
+        throw new RuntimeException(e);
+    }
+}
+%>
 </body>
 </html>

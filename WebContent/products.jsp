@@ -8,8 +8,7 @@
 <%@ include file="conn.jsp" %>
 </head>
 <body>
-
-
+<%@ include file="header.jsp"%>
 <table>
 	<tr>
 	<td><h2>Products</h2></td>
@@ -19,7 +18,6 @@
 		<form method="post" action="products.jsp">
 			<input type="text" name="search" placeholder="Search products" />
 		</form>
-	</td><p>Hello <%=session.getAttribute("name") %></p>
 	</td>
 	</tr>
 </table>

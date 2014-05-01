@@ -40,3 +40,14 @@ CREATE TABLE IF NOT EXISTS classify
   category INTEGER REFERENCES categories (ID) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS transactions
+(
+  id serial PRIMARY KEY,
+  user_id INTEGER REFERENCES users (id) NOT NULL,
+  product_id INTEGER REFERENCES products (id) NOT NULL,
+  price DECIMAL(18,2) NOT NULL CHECK (price >= 0),
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  credit_card INTEGER NOT NULL,
+  date timestamp without time zone NOT NULL DEFAULT NOW()
+);
+

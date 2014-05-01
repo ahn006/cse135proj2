@@ -14,7 +14,7 @@ if (!(request.getParameter("name") == null)) {
     pstmt.setString(1, request.getParameter("name"));
     rs = pstmt.executeQuery();
     if (!rs.next()) {
-        %>Username does not exist<%
+        %>The provided name <%= request.getParameter("name") %> is not known.<%
     }
     else {
         
