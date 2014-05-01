@@ -5,8 +5,10 @@ CREATE DATABASE cseproject
        LC_COLLATE = 'English_United States.1252'
        LC_CTYPE = 'English_United States.1252'
        CONNECTION LIMIT = -1;
-       
-CREATE TABLE users
+
+\connect cseproject
+
+CREATE TABLE IF NOT EXISTS users
 (
   id serial NOT NULL,
   username text UNIQUE NOT NULL,
@@ -16,14 +18,14 @@ CREATE TABLE users
   CONSTRAINT id PRIMARY KEY (id)
 );
 
-CREATE TABLE categories
+CREATE TABLE IF NOT EXISTS categories
 (
   id SERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   description TEXT NOT NULL
 );
 
-CREATE TABLE products
+CREATE TABLE IF NOT EXISTS products
 (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
@@ -31,7 +33,7 @@ CREATE TABLE products
   price DECIMAL(18,2) NOT NULL CHECK (price >= 0)
 );
 
-CREATE TABLE classify
+CREATE TABLE IF NOT EXISTS classify
 (
   id SERIAL PRIMARY KEY,
   product INTEGER REFERENCES products (ID) NOT NULL,
