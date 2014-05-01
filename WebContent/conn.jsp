@@ -11,7 +11,7 @@ try {
     // Open a connection to the database using DriverManager
     conn = DriverManager.getConnection(
         "jdbc:postgresql://127.0.0.1:5432/cseproject?" +
-        "user=postgres&password=admin");
+        "user=postgres&password=postgres");
 } catch (SQLException ex) {
     throw new RuntimeException(ex);
 }
