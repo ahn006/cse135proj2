@@ -23,7 +23,7 @@
 		<input type="text" name="age" required /> <br /> 
 		<label for="state">State</label> 
 		<select	name="state">
-			<option value="CA">CA</option>
+			<%@include file="states.html" %>
 		</select> <br /> 
 		<input type="submit" value="Sign Up" />
 		</form>
