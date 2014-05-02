@@ -11,12 +11,14 @@
 </head>
 <body>
 <%  
+try{
 pstmt = conn.prepareStatement("SELECT username FROM users WHERE username = ?");
 pstmt.setString(1, request.getParameter("name"));
 rs = pstmt.executeQuery();
-if (!rs.next()) {
-    pstmt = conn.prepareStatement("INSERT INTO users (username, age, state, type) VALUES (?,?,?,?)");
-    pstmt.setString(1, request.getParameter("name"));
+if (!rs.next() && (request.getParameter("name") != "") && (Integer.parseInt(request.getParameter("age")) > 0 ) && (request.getParameter("group") != "") && (request.getParameter("state") != "")) {
+    
+	pstmt = conn.prepareStatement("INSERT INTO users (username, age, state, type) VALUES (?,?,?,?)");
+	pstmt.setString(1, request.getParameter("name"));
     pstmt.setInt(2, Integer.parseInt(request.getParameter("age")));
     pstmt.setString(3, request.getParameter("state"));
     pstmt.setString(4, request.getParameter("group"));
@@ -27,10 +29,18 @@ if (!rs.next()) {
 }
 else {
 %>
-    Sign up has failed because the username already exists.
+    Sign up has failed.
     Please <a href="signup.jsp">try again</a> or <a href="login.jsp">log in</a>.
 <%
 }
+
+}
+catch(Exception e) {
+	    %>
+	    <p> An error occurred: <%=e.getMessage() %></p>
+	    <%
+	        
+	    }
 %>
 </body>
 </html>
