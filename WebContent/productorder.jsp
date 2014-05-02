@@ -44,8 +44,11 @@ else {
         <%
     }
     }
-    catch(SQLException e) {
-        throw new RuntimeException(e);
+    catch(Exception e) {
+    %>
+    <p> An error occurred: <%=e.getMessage() %></p>
+    <%
+        
     }
 }
 %>
