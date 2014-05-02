@@ -29,7 +29,7 @@
 	                %>
 	                <%=cart.getProducts().size() %>
 	                items in cart.
-	                <a href="checkout.jsp">Buy</a>
+	                <a href="cart.jsp">Buy</a>
 	                <%
 	            } 
 	            else {

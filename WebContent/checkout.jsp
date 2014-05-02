@@ -58,7 +58,7 @@ else {
                 cart.removeProduct(product);
             }
             else {
-                if ( ! ( rs.getInt("price") == product.getPrice() ) ) {
+                if ( ! ( rs.getDouble("price") == product.getPrice() ) ) {
                     %>
 	<p>
 		The price for product
@@ -66,7 +66,7 @@ else {
 		was changed. You were not billed for it and it remains in your cart
 	</p>
 	<%
-                    product.changePrice(rs.getInt("price"));
+                    product.changePrice(rs.getDouble("price"));
                 }
                 else {                    
                     Integer pid = rs.getInt("id");
@@ -79,7 +79,7 @@ else {
                         pstmt = conn.prepareStatement("INSERT INTO transactions (user_id, product_id, price, quantity, credit_card) VALUES (?,?,?,?,?)");
                         pstmt.setInt(1, uid);
                         pstmt.setInt(2, pid);
-                        pstmt.setInt(3, product.getPrice());
+                        pstmt.setDouble(3, product.getPrice());
                         pstmt.setInt(4, product.getQuantity());
                         pstmt.setInt(5, Integer.parseInt(request.getParameter("cc")));
                         int rowCount = pstmt.executeUpdate();

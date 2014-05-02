@@ -33,10 +33,10 @@ else {
         <form action = "cart.jsp" method="POST">
             <input type="hidden" name="action" value="add" />
             <input type="hidden" name="sku" value="<%= rs.getInt("sku") %>" />
-            <label for="product">Product Name; </label>
+            <label for="product">Product Name: </label>
             <input type="text" name="product" value="<%= rs.getString("name") %>" readonly />
             <label for="price">Price: $</label>
-            <input type="text" name="price" value="<%= rs.getInt("price") %>" readonly />
+            <input type="text" name="price" value="<%= rs.getDouble("price") %>" readonly />
             <label for="quantity">Enter quantity:</label>
             <input type="text" name="quantity" value="1"/>
             <input type="submit" value="Add to cart" />

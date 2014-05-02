@@ -58,12 +58,14 @@ else {
             else {
                 cart = (Cart) session.getAttribute("cart");
                 }
-            Product product = new Product( Integer.parseInt(request.getParameter("sku")),
+            Product product = new Product( request.getParameter("product"),
+            							   Integer.parseInt(request.getParameter("sku")),
                                            Integer.parseInt(request.getParameter("quantity")),
-                                           Integer.parseInt(request.getParameter("price"))
+                                           Double.parseDouble(request.getParameter("price"))
                                          );
             cart.addProduct(product);
             session.setAttribute("cart", cart);
+            session.setAttribute("currentproduct", request.getParameter("product"));
             response.sendRedirect("cart.jsp");
         }
         
@@ -82,25 +84,32 @@ else {
         }
         else {
             List<Product> products = cart.getProducts();
-            Integer total = 0;
+            Double total = 0.0;
             %>
             <table>
-            <tr><td>Product</td><td>Price</td><td>Quantity</td><td>Total</td></tr>
+            <tr><td>Product</td><td>SKU</td><td>Price</td><td>Quantity</td><td>Total</td></tr>
             <%
             for (Product product : products ) {
                 %>
                 <tr>
                 <td>
-                    <%= product.getProduct() %>
+                	<% if( product.getName().equals(session.getAttribute("currentproduct"))) { %>
+                    <%= product.getName() + " (last item added)" %>
+                    <%} else { %>
+                    <%= product.getName() %>
+                    <%} %> 
                 </td>
                 <td>
-                    <%= product.getPrice() %>
+                	<%= product.getProduct() %>
+                </td>
+                <td>
+                    <%= String.format( "%.2f", product.getPrice()) %>
                 </td>
                 <td>
                     <%= product.getQuantity() %>
                 </td>
                 <td>
-                    <%= product.getPrice()*product.getQuantity() %>
+                    <%= String.format( "%.2f", product.getPrice()*product.getQuantity() ) %>
                     <% total += product.getPrice()*product.getQuantity(); %>
                 </td>
                 </tr>
@@ -108,8 +117,13 @@ else {
             }
             %>
             </table>            
-            Total: <%= total %>
-            <a href="checkout.jsp">Buy Cart</a>
+            Total: <%= String.format( "%.2f", total) %>
+            <form action = "checkout.jsp" method="POST">
+            	<input type="text" name="cc" placeholder="Credit card number" />
+	            <input type="hidden" name="action" value="buy" />
+	            <input type="submit" value="Purchase" />
+        	</form>
+            <!--  a href="checkout.jsp">Buy Cart</a-->
             <%
         }
         
