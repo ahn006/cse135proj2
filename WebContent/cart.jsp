@@ -13,6 +13,7 @@
 <body>
 <%@include file="header.jsp"%>
 <%
+try{
 if ( session.getAttribute("name") == null) {
     %>
     You must be logged in to view cart. <a href="login.jsp">Login</a>
@@ -114,6 +115,14 @@ else {
         
     }
 }
+}
+catch(Exception e)
+{
+	 %>
+	    <p> An error occurred: <%=e.getMessage() %></p>
+	    <%
+}
+
 %>
 </body>
 </html>
