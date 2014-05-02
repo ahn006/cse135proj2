@@ -9,6 +9,7 @@
 </head>
 <body>
 <%
+try{
 if (!(request.getParameter("name") == null)) {
     pstmt = conn.prepareStatement("SELECT type FROM users WHERE username = ?");
     pstmt.setString(1, request.getParameter("name"));
@@ -30,6 +31,14 @@ if (!(request.getParameter("name") == null)) {
         }
     }
 }
+
+}
+catch(Exception e) {
+	    %>
+	    <p> An error occurred: <%=e.getMessage() %></p>
+	    <%
+	        
+	    }
 %>
     <div style="width: 25%">
         <form action="" method="post">
