@@ -22,12 +22,13 @@ if (!rs.next()) {
     pstmt.setString(4, request.getParameter("group"));
     int rowCount = pstmt.executeUpdate();
     %>
-    Sign up successful!
+    Sign up successful! <a href="login.jsp">Click here to Log in</a>.
     <%
 }
 else {
 %>
     Sign up has failed because the username already exists.
+    Please <a href="signup.jsp">try again</a> or <a href="login.jsp">log in</a>.
 <%
 }
 %>
