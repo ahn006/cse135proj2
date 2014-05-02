@@ -15,6 +15,7 @@
 <%@include file="header.jsp"%>
 <a href="browse.jsp">return to browsing</a>
 <%
+try{
 if ( session.getAttribute("name") == null ) {
     %>
     You need to be <a href="login.jsp"> logged in</a> to purchase.
@@ -88,6 +89,13 @@ else {
         <%
     }
 }
+}
+catch(Exception e) {
+	    %>
+	    <p> An error occurred: <%=e.getMessage() %></p>
+	    <%
+	        
+	    }
 %>
 </body>
 </html>
