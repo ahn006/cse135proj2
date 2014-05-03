@@ -3,3 +3,5 @@ Can only order item if signed in.
 If multiple items are purchased at once, each is processed as a separate transaction
 
 While signing up the user can not be of age 0. It has to be greater than 0
+
+Credit card is just a value. It does not have to be a valid card number
