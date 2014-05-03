@@ -72,7 +72,7 @@ else {
                 <%
             }
             %>
-            </table>     
+            </table>         
             <p>Total: <%= String.format( "%.2f", total) %></p>
             
             <%
