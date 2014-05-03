@@ -6,8 +6,6 @@ CREATE DATABASE cseproject
        LC_CTYPE = 'English_United States.1252'
        CONNECTION LIMIT = -1;
 
-
-
 CREATE TABLE IF NOT EXISTS users
 (
   id serial NOT NULL,
@@ -43,8 +41,8 @@ CREATE TABLE IF NOT EXISTS classify
 CREATE TABLE IF NOT EXISTS transactions
 (
   id serial PRIMARY KEY,
-  user_id INTEGER REFERENCES users (id) NOT NULL,
-  product_id INTEGER REFERENCES products (id) NOT NULL,
+  username TEXT NOT NULL,
+  product TEXT NOT NULL,
   price DECIMAL(18,2) NOT NULL CHECK (price >= 0),
   quantity INTEGER NOT NULL CHECK (quantity > 0),
   credit_card INTEGER NOT NULL,

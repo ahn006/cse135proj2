@@ -6,7 +6,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Cart</title>
+<title>Cart/Checkout</title>
 <%@include file="conn.jsp"%>
 
 </head>
@@ -118,7 +118,7 @@ else {
             %>
             </table>            
             Total: <%= String.format( "%.2f", total) %>
-            <form action = "checkout.jsp" method="POST">
+            <form action = "confirmation.jsp" method="POST">
             	<input type="text" name="cc" placeholder="Credit card number" />
 	            <input type="hidden" name="action" value="buy" />
 	            <input type="submit" value="Purchase" />
