@@ -1,9 +1,10 @@
 <%@ page import="java.sql.*"%>
 <%
+
 Connection conn = null;
 PreparedStatement pstmt = null;
+Statement stmt;
 ResultSet rs = null;
-
 try {
     // Registering Postgresql JDBC driver with the DriverManager
     Class.forName("org.postgresql.Driver");

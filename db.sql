@@ -5,47 +5,43 @@ CREATE DATABASE cseproject
        LC_COLLATE = 'English_United States.1252'
        LC_CTYPE = 'English_United States.1252'
        CONNECTION LIMIT = -1;
+\connect cseproject
+DROP TABLE users CASCADE;
+DROP TABLE categories CASCADE;
+DROP TABLE products CASCADE;
+DROP TABLE transactions CASCADE;
 
-CREATE TABLE IF NOT EXISTS users
-(
-  id serial NOT NULL,
-  username text UNIQUE NOT NULL,
-  age integer NOT NULL,
-  type text NOT NULL,
-  state text NOT NULL,
-  CONSTRAINT id PRIMARY KEY (id)
+/**table 1: [entity] users**/
+CREATE TABLE IF NOT EXISTS users (
+    id          SERIAL PRIMARY KEY,
+    username        TEXT NOT NULL UNIQUE,
+    type        TEXT,
+    age     INTEGER,
+    state   TEXT
 );
 
-CREATE TABLE IF NOT EXISTS categories
-(
-  id SERIAL PRIMARY KEY,
-  name TEXT UNIQUE NOT NULL,
-  description TEXT NOT NULL
+/**table 2: [entity] category**/
+CREATE TABLE IF NOT EXISTS categories (
+    id          SERIAL PRIMARY KEY,
+    name        TEXT NOT NULL UNIQUE,
+    description TEXT
 );
 
-CREATE TABLE IF NOT EXISTS products
-(
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  sku INTEGER UNIQUE NOT NULL,
-  price DECIMAL(18,2) NOT NULL CHECK (price >= 0)
+/**table 3: [entity] product**/
+CREATE TABLE IF NOT EXISTS products (
+    id          SERIAL PRIMARY KEY,
+    cid         INTEGER REFERENCES categories (id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    sku         TEXT NOT NULL UNIQUE,
+    category    TEXT NOT NULL,
+    price       FLOAT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS classify
-(
-  id SERIAL PRIMARY KEY,
-  product INTEGER REFERENCES products (ID) NOT NULL,
-  category INTEGER REFERENCES categories (ID) NOT NULL
+/**table 4: [relation] carts**/
+CREATE TABLE IF NOT EXISTS transactions (
+    id          SERIAL PRIMARY KEY,
+    uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    pid         INTEGER REFERENCES products (id) ON DELETE CASCADE,
+    quantity    INTEGER,
+    price       FLOAT
 );
-
-CREATE TABLE IF NOT EXISTS transactions
-(
-  id serial PRIMARY KEY,
-  username TEXT NOT NULL,
-  product TEXT NOT NULL,
-  price DECIMAL(18,2) NOT NULL CHECK (price >= 0),
-  quantity INTEGER NOT NULL CHECK (quantity > 0),
-  credit_card INTEGER NOT NULL,
-  date timestamp without time zone NOT NULL DEFAULT NOW()
-);
-
