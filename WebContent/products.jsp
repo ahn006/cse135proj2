@@ -7,7 +7,9 @@
 
 <body>
 <%@include file="header.jsp" %>
+
 <div style="width:20%; position:absolute; top:50px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+    <a href="categories.jsp">Categories</a> <a href="products.jsp">Products</a>
     <table width="100%">
         <tr><td><a href="products.jsp?cid=-1" target="_self">All Categories</a></td></tr>
 <%

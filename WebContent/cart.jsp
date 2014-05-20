@@ -59,7 +59,7 @@ else {
                 cart = (Cart) session.getAttribute("cart");
                 }
             Product product = new Product( request.getParameter("product"),
-            							   Integer.parseInt(request.getParameter("sku")),
+            							   request.getParameter("sku"),
                                            Integer.parseInt(request.getParameter("quantity")),
                                            Double.parseDouble(request.getParameter("price"))
                                          );

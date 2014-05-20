@@ -86,6 +86,7 @@ if(session.getAttribute("name")!=null)
             }
         }
 %>
+    <a href="categories.jsp">Categories</a> <a href="products.jsp">Products</a>
     <table width="100%"  border="1px" align="center">
     <tr align="center"><td width="20%"><B>Category Name</B></td><td width="60%"><B>Category Description</B></td><td width="5%"><B>Count</B></td><td width="15%" colspan="2"><B>Operations</B></td></tr>
     <form action="categories.jsp" method="post">

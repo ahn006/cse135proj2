@@ -1,246 +1,114 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ page import="com.cse135.group49.project.*"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<%@ page contentType="text/html; charset=utf-8" language="java" import="java.sql.*" import="database.*"   import="java.util.*" errorPage="" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Product Browsing</title>
-<%@ include file="conn.jsp"%>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>CSE135</title>
 </head>
+
 <body>
-	<%@ include file="header.jsp"%>
-	<%
-	    if (session.getAttribute("name") == null) {
-	        %>
-	        Search functionality is reserved for logged in users. Please
-	        <a href="login.jsp">login</a>.
-	        <%
-	    } 
-	    else {
-	        if (session.getAttribute("cart") == null) {
-	            %>
-	            Your cart is empty
-	            <%
-	        } 
-	        else {
-	            Cart cart = (Cart) session.getAttribute("cart");
-	            if (cart.getProducts().size() > 0) {
-	                %>
-	                <%=cart.getProducts().size() %>
-	                items in cart.
-	                <a href="cart.jsp">Buy</a>
-	                <%
-	            } 
-	            else {
-	                %>
-	                Your cart is empty
-	                <%
-	            }
-	        }
-	%>
-	<table>
-		<tr>
-			<td><h2>Product Browsing</h2></td>
-			<td>
-				<form method="post" action="browse.jsp">
-					<input type="text" name="search" placeholder="Search products" />
-				</form>
-			</td>
-		</tr>
-	</table>
-	<%
-	    }
+<%@include file="header.jsp" %>
+<table width="100%"><tr><td align="right"><a href="cart.jsp" target="_self">Buy Shopping Cart</a></td></tr></table>
+<%
+if(session.getAttribute("name")!=null)
+{
+    //int userID  = (Integer)session.getAttribute("userID");
+    //String role = (String)session.getAttribute("role");
+%>
+<div style="width:20%; position:absolute; top:55px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+    
+    <table width="100%">
+        <tr><td><a href="products_browsing.jsp?cid=-1" target="_self">All Categories</a></td></tr>
+        
+        <%@include file="conn.jsp" %>
+        <%
+        String SQL=null;
+        try
+        {
+            stmt =conn.createStatement();
+            rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");
+            String c_name=null;
+            int c_id=0;
+            while(rs.next())
+            {
+                c_id=rs.getInt(1);
+                c_name=rs.getString(2);
+                out.println("<tr><td><a href=\"products_browsing.jsp?cid="+c_id+"\" target=\"_self\">"+c_name+"</a></td></tr>");
+            }
+        %>
+    </table>    
+</div>
 
-	    if (request.getParameter("filtercategory") != null) {
-	        if (request.getParameter("filtercategory").equals(
-	                "All Products")) {
-	            session.setAttribute("currentcategory", "categories.name");
-	        } else {
-	            session.setAttribute("currentcategory",
-	                    "'" + request.getParameter("filtercategory") + "'");
-	        }
-	    }
-	%>
+<div style="width:79%; position:absolute; top:55px; right:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
+<%
+       String c_id_str=null,key=null;
+       int c_id_int=-1;
+       try {c_id_str=request.getParameter("cid"); c_id_int=Integer.parseInt(c_id_str);}catch(Exception e){c_id_str=null;c_id_int=-1;}
+       try {key=request.getParameter("key");}catch(Exception e){key=null;}
 
-	<table>
-
-		<tr>
-			<td valign="top">
-				<%
-				    conn.setAutoCommit(false);
-
-				    // This first prepared statement inserts the input values into the products
-				    // table
-				    pstmt = conn.prepareStatement("SELECT * from categories");
-
-				    rs = pstmt.executeQuery();
-				    String category = (String) (session.getAttribute("currentcategory"));
-				%>
-
-				<ul>
-					<li>
-						<form action="browse.jsp" method="post">
-							<input type="hidden" name="filtercategory" value="All Products" />
-							<input type="submit" value="All Products" />
-						</form>
-					</li>
-
-					<%
-					    while (rs.next()) {
-					%><li>
-						<form action="browse.jsp" method="post">
-							<input type="hidden" name="filtercategory"
-								value="<%=rs.getString("name")%>" /> <input type="submit"
-								value="<%=rs.getString("name")%>" />
-						</form>
-					</li>
-					<%
-					    }
-					%>
-				</ul> <%
-     conn.setAutoCommit(true);
-
-     rs.close();
-     rs = null;
-     pstmt.close();
-     pstmt = null;
- %>
-			</td>
-			<td>
-				<%
-				    try {
-				%> <%-- -------- SELECT Statement Code -------- --%> <%
-     conn.setAutoCommit(false);
-         // Create the statement
-         Statement statement = conn.createStatement();
-
-         Statement statement2 = conn.createStatement();
-         ResultSet rs2 = statement2
-                 .executeQuery("SELECT * FROM categories");
-
-         // This first resultset is for setting up the update entries
-
-         if (request.getParameter("search") != null) {
-             rs = statement
-                     .executeQuery("SELECT products.*, categories.name as categoryName "
-                             + "FROM products, categories, classify WHERE substring(lower(products.name) from '"
-                             + request.getParameter("search")
-                                     .toLowerCase()
-                             + "') = '"
-                             + request.getParameter("search")
-                                     .toLowerCase()
-                             + "' AND categories.name = "
-                             + category
-                             + " AND classify.product = products.id AND classify.category = categories.id");
-         } else if (request.getParameter("filtercategory") == null
-                 || request.getParameter("filtercategory").equals(
-                         "All Products")) {
-             rs = statement
-                     .executeQuery("SELECT products.*, categories.name as categoryName "
-                             + "FROM products, categories, classify "
-                             + "WHERE classify.product = products.id AND classify.category = categories.id");
-         } else {
-             while (rs2.next()) {
-                 if (request.getParameter("filtercategory").equals(
-                         rs2.getString("name"))) {
-                     rs = statement
-                             .executeQuery("SELECT products.*, categories.name as categoryName "
-                                     + "FROM products, categories, classify "
-                                     + "WHERE categories.name = '"
-                                     + rs2.getString("name")
-                                     + "'"
-                                     + "AND classify.product = products.id AND classify.category = "
-                                     + "categories.id");
-                 }
-             }
-         }
-         // This second resultset is for populating the dropdown menus of category
-         statement2 = conn.createStatement();
-         rs2 = statement2.executeQuery("SELECT * FROM categories");
- %> <!-- Add an HTML table header row to format the results -->
-				<table border="1">
-					<tr>
-						<th>Name</th>
-						<th>SKU</th>
-						<th>Price</th>
-						<th>Category</th>
-					</tr>
+        
+        if(c_id_int==-1 && key==null)
+        {
+            SQL="SELECT id,name,SKU, category, price FROM products order by id asc;";
+        }
+        else
+        {
+            if(c_id_int==-1 && key!=null)
+            {
+                SQL="SELECT id,name,SKU, category, price FROM products where name LIKE '"+key+"%' order by id asc;";
+            }
+            else if(c_id_int!=-1 && key!=null)
+            {
+                SQL="SELECT id,name,SKU, category, price FROM products where cid="+c_id_int+" and name LIKE '"+key+"%' order by id asc;";
+            }
+            else if(c_id_int!=-1 && key==null)
+            {
+                SQL="SELECT id,name,SKU, category, price FROM products where cid="+c_id_int+" order by id asc;";
+            }
+        }
+%>
+<form action="products_browsing.jsp" method="post">
+Search for products: 
+<input type="text" name="cid" id="cid" value="<%=c_id_int%>" style="display:none">
+<input type="text" id="key" name="key" size="50"><input type="submit" value="Search">
+</form>
+<br>
 
 
-					<%-- -------- Iteration Code -------- --%>
-					<%
-					    // Iterate over the ResultSet
-					        while (rs.next()) {
-					%>
+<%      
+        rs=stmt.executeQuery(SQL);
+        out.println("<table width=\"100%\"  border=\"1px\" align=\"center\">");
+        out.println("<tr align=\"center\"><td width=\"20%\"><B>Product Name</B></td><td width=\"20%\"><B>SKU number</B></td><td width=\"20%\"><B>Categgory</B></td><td width=\"20%\"><B>Price</B></td><td width=\"20%\"><B>Operations</B></td></tr>");
+        int id=0;
+        String name="", SKU="",category=null;
+        float price=0;
+        while(rs.next())
+        {
+            id=rs.getInt(1);
+            name=rs.getString(2);
+             SKU=rs.getString(3);
+             category=rs.getString(4);
+             price=rs.getFloat(5);
+             out.println("<tr align=\"center\"><td width=\"20%\">"+name+"</td><td width=\"20%\">"+SKU+"</td><td width=\"20%\">"+category+"</td><td width=\"20%\">"+price+"</td><td width=\"20%\"><a href=\"productorder.jsp?product="+id+"\">Buy it</a></td></tr>");
+        }
+        out.println("</table>");
+    }
+    catch(Exception e)
+    {
+        out.println(SQL);
+        out.println("<font color='#ff0000'>Error.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
 
-					<tr>
-
-
-
-						<%-- Get the first name --%>
-						<td><%=rs.getString("name")%></td>
-
-						<%-- Get the middle name --%>
-						<td><%=rs.getInt("sku")%></td>
-
-						<td><%=rs.getDouble("price")%></td>
-						<td><%=rs.getString("categoryName")%></td>
-						<td><a href="productorder.jsp?product=<%= rs.getInt("id") %>">Order</a></td>
-					</tr>
-
-					<%
-					    }
-					%>
-
-					<%-- -------- Close Connection Code -------- --%>
-					<%
-					    // Close the ResultSet
-					        rs.close();
-					        rs2.close();
-					        // Close the Statement
-					        statement.close();
-					        statement2.close();
-
-					        conn.setAutoCommit(true);
-
-					        // Close the Connection
-					        conn.close();
-					    } catch (SQLException e) {
-
-					        // Wrap the SQL exception in a runtime exception to propagate
-					        // it upwards
-					        throw new RuntimeException(e);
-					    } finally {
-					        // Release resources in a finally block in reverse-order of
-					        // their creation
-
-					        if (rs != null) {
-					            try {
-					                rs.close();
-					            } catch (SQLException e) {
-					            } // Ignore
-					            rs = null;
-					        }
-					        if (pstmt != null) {
-					            try {
-					                pstmt.close();
-					            } catch (SQLException e) {
-					            } // Ignore
-					            pstmt = null;
-					        }
-					        if (conn != null) {
-					            try {
-					                conn.close();
-					            } catch (SQLException e) {
-					            } // Ignore
-					            conn = null;
-					        }
-					    }
-					%>
-				</table>
-			</td>
-		</tr>
-	</table>
+    
+    }
+    finally
+    {
+        conn.close();
+    }
+}
+else
+{
+    out.println("Please go to <a href=\"login.jsp\" target=\"_self\">home page</a> to login first.");
+}
+%>
+</div>
 </body>
 </html>

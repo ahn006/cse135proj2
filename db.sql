@@ -5,19 +5,20 @@ CREATE DATABASE cseproject
        LC_COLLATE = 'English_United States.1252'
        LC_CTYPE = 'English_United States.1252'
        CONNECTION LIMIT = -1;
-\connect cseproject
-DROP TABLE users CASCADE;
-DROP TABLE categories CASCADE;
-DROP TABLE products CASCADE;
-DROP TABLE transactions CASCADE;
+       
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS classify CASCADE;
 
 /**table 1: [entity] users**/
 CREATE TABLE IF NOT EXISTS users (
     id          SERIAL PRIMARY KEY,
-    username        TEXT NOT NULL UNIQUE,
+    username    TEXT NOT NULL UNIQUE,
     type        TEXT,
-    age     INTEGER,
-    state   TEXT
+    age         INTEGER,
+    state       TEXT
 );
 
 /**table 2: [entity] category**/
@@ -42,6 +43,8 @@ CREATE TABLE IF NOT EXISTS transactions (
     id          SERIAL PRIMARY KEY,
     uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
     pid         INTEGER REFERENCES products (id) ON DELETE CASCADE,
+    credit_card INTEGER,
     quantity    INTEGER,
-    price       FLOAT
+    price       FLOAT,
+    date timestamp without time zone NOT NULL DEFAULT NOW()
 );

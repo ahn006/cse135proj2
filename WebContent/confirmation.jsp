@@ -43,8 +43,8 @@ else {
         %>
 	<%
         for (Product product : products ) {
-            pstmt = conn.prepareStatement("SELECT name, price FROM products WHERE sku = ?");
-            pstmt.setInt(1, product.getProduct());
+            pstmt = conn.prepareStatement("SELECT name, price, id FROM products WHERE sku = ?");
+            pstmt.setString(1, product.getProduct());
             rs = pstmt.executeQuery();
             if(!rs.next()) {
                 %>
@@ -69,15 +69,17 @@ else {
                 }
                 else {                    
                     String productName = rs.getString("name");
-                    pstmt = conn.prepareStatement("SELECT username FROM users WHERE username =?");
+                    int pid = rs.getInt("id");
+                    pstmt = conn.prepareStatement("SELECT username, id FROM users WHERE username =?");                    
                     pstmt.setString(1, session.getAttribute("name").toString());
                     rs = pstmt.executeQuery();
                     rs.next();
                     String uname = rs.getString("username");
+                    int uid = rs.getInt("id");
                     try {
-                        pstmt = conn.prepareStatement("INSERT INTO transactions (username, product, price, quantity, credit_card) VALUES (?,?,?,?,?)");
-                        pstmt.setString(1, uname);
-                        pstmt.setString(2, productName);
+                        pstmt = conn.prepareStatement("INSERT INTO transactions (uid, pid, price, quantity, credit_card) VALUES (?,?,?,?,?)");
+                        pstmt.setInt(1, uid);
+                        pstmt.setInt(2, pid);
                         pstmt.setDouble(3, product.getPrice());
                         pstmt.setInt(4, product.getQuantity());
                         pstmt.setInt(5, Integer.parseInt(request.getParameter("cc")));
