@@ -1,13 +1,14 @@
 <%@ page contentType="text/html; charset=utf-8" language="java" import="java.sql.*" import="database.*"   import="java.util.*" errorPage="" %>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>CSE135</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CSE135 Product Browsing</title>
 </head>
 
 <body>
 <%@include file="header.jsp" %>
-<table width="100%"><tr><td align="right"><a href="cart.jsp" target="_self">Buy Shopping Cart</a></td></tr></table>
+
 <%
 if(session.getAttribute("name")!=null)
 {
@@ -15,7 +16,7 @@ if(session.getAttribute("name")!=null)
     //String role = (String)session.getAttribute("role");
 %>
 <div style="width:20%; position:absolute; top:55px; left:0px; height:90%; border-bottom:1px; border-bottom-style:solid;border-left:1px; border-left-style:solid;border-right:1px; border-right-style:solid;border-top:1px; border-top-style:solid;">
-    
+    <a href="cart.jsp" target="_self">Buy Shopping Cart</a>
     <table width="100%">
         <tr><td><a href="products_browsing.jsp?cid=-1" target="_self">All Categories</a></td></tr>
         
@@ -68,10 +69,10 @@ if(session.getAttribute("name")!=null)
 %>
 <form action="products_browsing.jsp" method="post">
 Search for products: 
-<input type="text" name="cid" id="cid" value="<%=c_id_int%>" style="display:none">
-<input type="text" id="key" name="key" size="50"><input type="submit" value="Search">
+<input type="hidden" name="cid" id="cid" value="<%=c_id_int%>" />
+<input type="text" id="key" name="key" size="50"><input type="submit" value="Search" />
 </form>
-<br>
+<br />
 
 
 <%      

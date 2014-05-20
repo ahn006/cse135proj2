@@ -1,8 +1,9 @@
 <%@ page contentType="text/html; charset=utf-8" language="java" import="java.sql.*"   import="java.util.*" errorPage="" %>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>CSE135</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>CSE135 Products</title>
 </head>
 
 <body>
@@ -146,13 +147,13 @@ Search for products:
     <tr align="center">
         <td width="20%"><B>Product Name</B></td>
         <td width="20%"><B>SKU number</B></td>
-        <td width="20%"><B>Categgory</B></td>
+        <td width="20%"><B>Category</B></td>
         <td width="20%"><B>Price</B></td>
         <td width="20%" colspan="2"><B>Operations</B></td>
     </tr>
     <form action="products.jsp" method="post">
     <tr align="center">
-        <input type="text" name="action" id="action" value="insert"  style="display:none">
+        <input type="hidden" name="action" id="action" value="insert" />
         <td width="20%"><input type="text" name="name" id="name"></td>
         <td width="20%"><input type="text" name="SKU" id="SKU"></td>
         <td width="20%">
@@ -171,7 +172,7 @@ Search for products:
         <td width="20%"><input type="text" name="price" id="price" ></td>
         <td width="20%" colspan="2"><input type="submit"  value="Insert"></td>
     </tr>
-</form>
+    </form>
 <%      
         rs=stmt.executeQuery(SQL);
         int id=0;
@@ -188,17 +189,18 @@ Search for products:
         
         <tr align="center">
         <form action="products.jsp" method="post">
-            <input type="text" name="action" id="action" value="update" style="display:none">
-            <input type="text" name="id" id="id" value="<%=id%>" style="display:none">
-            <td width="20%"><input type="text" name="name" id="name" value="<%=name%>"></td>
-            <td width="20%"><input type="text" name="SKU" id="SKU" value="<%=SKU%>"></td>
-            <td width="20%"><input type="text" name="category" id="category" value="<%=category%>"></td>
-            <td width="10%"><input type="text" name="price" id="price" value="<%=price%>"></td>
-            <td width="10%"><input type="submit" value="Update"></td>
+            <input type="hidden" name="action" id="action" value="update" />
+            <input type="hidden" name="id" id="id" value="<%=id%>" />
+            <td width="20%"><input type="text" name="name" id="name" value="<%=name%>" /></td>
+            <td width="20%"><input type="text" name="SKU" id="SKU" value="<%=SKU%>" /></td>
+            <td width="20%"><input type="text" name="category" id="category" value="<%=category%>" /></td>
+            <td width="10%"><input type="text" name="price" id="price" value="<%=price%>" /></td>
+            <td width="10%"><input type="submit" value="Update" /></td>
         </form>
         <form action="products.jsp" method="post">
-            <input type="text" name="action" id="action" value="delete" width="3" style="display:none"><input type="text" name="id" id="id" value="<%=id%>" width="3"  style="display:none">
-            <td width="10%"><input type="submit" value="Delete"></td>
+            <input type="hidden" name="action" id="action" value="delete" width="3" />
+            <input type="hidden" name="id" id="id" value="<%=id%>" width="3" />
+            <td width="10%"><input type="submit" value="Delete" /></td>
         </form>
         </tr>       
 <%           
