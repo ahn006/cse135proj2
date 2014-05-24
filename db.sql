@@ -15,8 +15,8 @@ DROP TABLE IF EXISTS classify CASCADE;
 /**table 1: [entity] users**/
 CREATE TABLE IF NOT EXISTS users (
     id          SERIAL PRIMARY KEY,
-    username    TEXT NOT NULL UNIQUE,
-    type        TEXT,
+    name        TEXT NOT NULL UNIQUE,
+    role        TEXT,
     age         INTEGER,
     state       TEXT
 );
@@ -34,17 +34,15 @@ CREATE TABLE IF NOT EXISTS products (
     cid         INTEGER REFERENCES categories (id) ON DELETE CASCADE,
     name        TEXT NOT NULL,
     sku         TEXT NOT NULL UNIQUE,
-    category    TEXT NOT NULL,
+    category    TEXT,
     price       FLOAT NOT NULL
 );
 
 /**table 4: [relation] carts**/
-CREATE TABLE IF NOT EXISTS transactions (
+CREATE TABLE IF NOT EXISTS sales (
     id          SERIAL PRIMARY KEY,
     uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
     pid         INTEGER REFERENCES products (id) ON DELETE CASCADE,
-    credit_card INTEGER,
     quantity    INTEGER,
-    price       FLOAT,
-    date timestamp without time zone NOT NULL DEFAULT NOW()
+    price       FLOAT
 );

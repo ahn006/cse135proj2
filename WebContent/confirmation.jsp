@@ -70,19 +70,18 @@ else {
                 else {                    
                     String productName = rs.getString("name");
                     int pid = rs.getInt("id");
-                    pstmt = conn.prepareStatement("SELECT username, id FROM users WHERE username =?");                    
+                    pstmt = conn.prepareStatement("SELECT name, id FROM users WHERE namename =?");                    
                     pstmt.setString(1, session.getAttribute("name").toString());
                     rs = pstmt.executeQuery();
                     rs.next();
-                    String uname = rs.getString("username");
+                    String uname = rs.getString("name");
                     int uid = rs.getInt("id");
                     try {
-                        pstmt = conn.prepareStatement("INSERT INTO transactions (uid, pid, price, quantity, credit_card) VALUES (?,?,?,?,?)");
+                        pstmt = conn.prepareStatement("INSERT INTO sales (uid, pid, price, quantity) VALUES (?,?,?,?)");
                         pstmt.setInt(1, uid);
                         pstmt.setInt(2, pid);
                         pstmt.setDouble(3, product.getPrice());
                         pstmt.setInt(4, product.getQuantity());
-                        pstmt.setInt(5, Integer.parseInt(request.getParameter("cc")));
                         int rowCount = pstmt.executeUpdate();
                         %>
 	<p>

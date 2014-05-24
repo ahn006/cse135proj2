@@ -11,7 +11,7 @@
 <%
 try{
 if (!(request.getParameter("name") == null)) {
-    pstmt = conn.prepareStatement("SELECT type FROM users WHERE username = ?");
+    pstmt = conn.prepareStatement("SELECT role FROM users WHERE name = ?");
     pstmt.setString(1, request.getParameter("name"));
     rs = pstmt.executeQuery();
     if (!rs.next()) {
@@ -19,14 +19,14 @@ if (!(request.getParameter("name") == null)) {
     }
     else {
         
-        if(rs.getString("type").equals("owner")) {
+        if(rs.getString("role").equals("owner")) {
             session.setAttribute("name", request.getParameter("name"));
-            session.setAttribute("group", "owner");
+            session.setAttribute("role", "owner");
             response.sendRedirect("categories.jsp");
         }
-        if (rs.getString("type").equals("customer")) {
+        if (rs.getString("role").equals("customer")) {
             session.setAttribute("name", request.getParameter("name"));
-            session.setAttribute("group", "customer");
+            session.setAttribute("role", "customer");
             response.sendRedirect("browse.jsp");
         }
     }

@@ -12,12 +12,12 @@
 <body>
 <%  
 try{
-pstmt = conn.prepareStatement("SELECT username FROM users WHERE username = ?");
+pstmt = conn.prepareStatement("SELECT name FROM users WHERE name = ?");
 pstmt.setString(1, request.getParameter("name"));
 rs = pstmt.executeQuery();
 if (!rs.next() && (request.getParameter("name") != "") && (Integer.parseInt(request.getParameter("age")) > 0 ) && (request.getParameter("group") != "") && (request.getParameter("state") != "")) {
     
-	pstmt = conn.prepareStatement("INSERT INTO users (username, age, state, type) VALUES (?,?,?,?)");
+	pstmt = conn.prepareStatement("INSERT INTO users (name, age, state, role) VALUES (?,?,?,?)");
 	pstmt.setString(1, request.getParameter("name"));
     pstmt.setInt(2, Integer.parseInt(request.getParameter("age")));
     pstmt.setString(3, request.getParameter("state"));
