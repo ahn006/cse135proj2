@@ -75,16 +75,7 @@ if(session.getAttribute("name")!=null)
 			Statement userstmt = conn.createStatement();
 			ResultSet users = null;
 			PreparedStatement pStat = conn.prepareStatement("SELECT id, name FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ? ORDER BY name ASC LIMIT 20 OFFSET " + session.getAttribute("rowOffset")); 
-			/*
-			if( session.getAttribute("ageFilter") == null ) {
-				users = userstmt.executeQuery("SELECT id, name FROM users ORDER BY name ASC LIMIT 20 OFFSET " + session.getAttribute("rowOffset"));
-			}
-			else {
-				PreparedStatement pStat = conn.prepareStatement("SELECT id, name FROM users WHERE users.age >= ? AND users.age < ? ORDER BY name ASC LIMIT 20 OFFSET " + session.getAttribute("rowOffset"));  
-				pStat.setInt(1, ageArr[0]);
-				pStat.setInt(2, ageArr[1]);
-				users = pStat.executeQuery();
-			}*/
+			
 			int nextOffset = Integer.parseInt(session.getAttribute("rowOffset").toString()) + 20;
 			PreparedStatement pStat2 = conn.prepareStatement("SELECT id, name FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ? ORDER BY name ASC LIMIT 20 OFFSET " + nextOffset); 
 			
@@ -103,28 +94,25 @@ if(session.getAttribute("name")!=null)
 			PreparedStatement pro = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + session.getAttribute("colOffset"));
 			pro.setString(1, request.getParameter("categoryFilter"));
 			rs = pro.executeQuery();
-			
-			PreparedStatement pro2 = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + session.getAttribute("colOffset"));
+
+            int temp = (Integer.parseInt(session.getAttribute("colOffset").toString()) + 10);
+
+			PreparedStatement pro2 = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + temp);
 			pro2.setString(1, request.getParameter("categoryFilter"));
 			ResultSet nextPro = pro2.executeQuery();
 			
-			//int temp = (Integer.parseInt(session.getAttribute("rowOffset").toString()) + 20);
+
 			Statement stmt2 = conn.createStatement();
-            /*ResultSet nextCus = stmt2.executeQuery("SELECT id, name FROM users ORDER BY name ASC LIMIT 20 OFFSET " + temp);
-            */
             ResultSet nextCus = pStat2.executeQuery();
             while(nextCus.next()) {
             	rowCnt++;
             }
             
-            int temp = (Integer.parseInt(session.getAttribute("colOffset").toString()) + 10);
-            //ResultSet nextPro = stmt2.executeQuery( "SELECT id, name FROM products ORDER BY name ASC LIMIT 10 OFFSET " + temp );
   
             while(nextPro.next()) {
             	colCnt++;
             }
-            //stmt2.close();
-            //nextCus.close();
+            nextCus.close();
             nextPro.close();
             
             
@@ -172,15 +160,44 @@ if(session.getAttribute("name")!=null)
             stmt.execute("CREATE INDEX state_index ON analytics (state)");
             
             Statement statestmt = conn.createStatement();
-            ResultSet states = statestmt.executeQuery("SELECT state FROM users GROUP BY state ORDER BY state ASC");
+            PreparedStatement pStat = conn.prepareStatement("SELECT state FROM users WHERE age >= ? AND age < ? AND state LIKE ? GROUP BY state ORDER BY state ASC LIMIT 20 OFFSET " + session.getAttribute("rowOffset"));
+            //ResultSet states = statestmt.executeQuery("SELECT state FROM users GROUP BY state ORDER BY state ASC");
+			pStat.setInt(1, ageArr[0]);	
+			pStat.setInt(2, ageArr[1]);            
+			pStat.setString(3, state);
+			
+			ResultSet states = pStat.executeQuery();
+			
+			int nextOffset = Integer.parseInt(session.getAttribute("rowOffset").toString()) + 20;
+            PreparedStatement nextStates = conn.prepareStatement("SELECT state FROM users WHERE age >= ? AND age < ? AND state LIKE ? GROUP BY state ORDER BY state ASC LIMIT 20 OFFSET " + nextOffset);
+			nextStates.setInt(1, ageArr[0]);	
+			nextStates.setInt(2, ageArr[1]);            
+			nextStates.setString(3, state);
+			ResultSet next20 = nextStates.executeQuery();
+			while(next20.next()) {
+				rowCnt++;
+			}
+			
+			
+            PreparedStatement pStat2 = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + session.getAttribute("colOffset"));
+            //rs = stmt.executeQuery("SELECT id, name FROM products ORDER BY name ASC");
+			pStat2.setString(1, request.getParameter("categoryFilter"));
+            rs = pStat2.executeQuery();
+			
+			int temp = (Integer.parseInt(session.getAttribute("colOffset").toString()) + 10);
+			PreparedStatement pStat3 = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + temp);
+			pStat3.setString(1, request.getParameter("categoryFilter"));
+			ResultSet nextP = pStat3.executeQuery();
+            while(nextP.next()) {
+            	colCnt++;
+            }
             
-            rs = stmt.executeQuery("SELECT id, name FROM products ORDER BY name ASC");
             out.println("<table>");            
             out.println("<tr><td></td>");
             ArrayList<Integer> pids = new ArrayList<Integer>();
             
             while(rs.next()) { 
-                out.println("<td>"+rs.getString("name")+"</td>");
+                out.println("<td><b>"+rs.getString("name")+"</b></td>");
                 pids.add(rs.getInt("id"));
             }
             
@@ -188,7 +205,7 @@ if(session.getAttribute("name")!=null)
             pstmt = conn.prepareStatement("SELECT sum FROM analytics WHERE state = ? AND pid = ?");
             while (states.next()) {
                 out.println("<tr>");
-                out.println("<td>" + states.getString("state") + "</td>");
+                out.println("<td><b>" + states.getString("state") + "</b></td>");
                 for (Integer pid : pids ) {
                     pstmt.setString(1, states.getString("state"));
                     pstmt.setInt(2, pid);
