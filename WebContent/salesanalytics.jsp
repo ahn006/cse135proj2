@@ -230,9 +230,13 @@ if(session.getAttribute("name")!=null)
 			pstmt.setInt(1, ageArr[0]);
 			pstmt.setInt(2, ageArr[1]);
             while (states.next()) {
-            	PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics JOIN (SELECT products.id FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid) AS s ON s.id = analytics.pid WHERE state LIKE ?");
-            	pstmt2.setString(1, request.getParameter("categoryFilter"));
-            	pstmt2.setString(2, states.getString("state"));
+            	//PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics JOIN (SELECT products.id FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid) AS s ON s.id = analytics.pid WHERE state LIKE ?");
+            	PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM (analytics JOIN (SELECT id FROM users WHERE state = ? AND age >= ? AND age < ?) as foo ON analytics.uid = foo.id) as bar JOIN (SELECT products.id FROM products, categories WHERE categories.name LIKE ? AND products.cid = categories.id) AS temp ON temp.id = bar.pid");
+            	pstmt2.setString(1, states.getString("state"));
+            	pstmt2.setInt(2, ageArr[0]);
+            	pstmt2.setInt(3, ageArr[1]);
+            	pstmt2.setString(4, request.getParameter("categoryFilter"));
+            	
             	
             	ResultSet rs2 = pstmt2.executeQuery();
             	rs2.next();
@@ -253,7 +257,7 @@ if(session.getAttribute("name")!=null)
             }
 		}
 		conn.close();
-		double end = System.nanoTime();
+		double end = System.nanoTime(); // This is the timer. comment out
 		out.println("<h2>" + ((end - start) / 1000000000.0 ) + " seconds" + "</h2>");
 	}
 	else { // Action was null so analytics page was just started
