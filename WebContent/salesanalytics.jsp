@@ -120,19 +120,32 @@ if(session.getAttribute("name")!=null)
             out.println("<table>");            
             out.println("<tr><td></td>");
             ArrayList<Integer> pids = new ArrayList<Integer>();
-           
+
+            PreparedStatement pst = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics join (SELECT id FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ?) AS foo ON analytics.uid = foo.id WHERE analytics.pid = ?");
+            pst.setInt(1, ageArr[0]);
+            pst.setInt(2, ageArr[1]);
+            pst.setString(3, state);
             while(rs.next()) { 
-                out.println("<td><b>"+rs.getString("name")+"</b></td>");
+            	pst.setInt(4, rs.getInt("id"));
+            	ResultSet foo = pst.executeQuery();
+            	int total = 0;
+            	if(foo.next()) {
+            		total = foo.getInt("total");
+            	}
+                out.println("<td><b>"+rs.getString("name")+ " ($" + total + ")" + "</b></td>");
                 pids.add(rs.getInt("id"));
             }
             
             out.println("</tr>");
             pstmt = conn.prepareStatement("SELECT sum FROM analytics WHERE uid = ? AND pid = ?");
             
+            
+            
             while (users.next()) {
-            	PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics WHERE uid = ?");
-            	pstmt2.setInt(1, users.getInt("id"));
-      
+            	PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics JOIN (SELECT products.id FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid) AS s ON s.id = analytics.pid WHERE uid = ?");
+            	pstmt2.setString(1, request.getParameter("categoryFilter"));
+            	pstmt2.setInt(2, users.getInt("id"));
+            	
             	ResultSet rs2 = pstmt2.executeQuery();
             	rs2.next();
                 out.println("<tr>");
@@ -156,7 +169,7 @@ if(session.getAttribute("name")!=null)
 		else if ( request.getParameter("rows").equals("states")) {
 			stmt = conn.createStatement();
             stmt.execute("DROP TABLE IF EXISTS analytics");
-            stmt.execute("CREATE TEMPORARY TABLE analytics AS SELECT st.state , pid, SUM(s.quantity*s.price) FROM sales s INNER JOIN (SELECT users.id, users.state FROM users ORDER BY users.state ASC ) As st ON s.uid = st.id GROUP BY st.state, s.pid ORDER BY st.state, s.pid");
+            stmt.execute("CREATE TEMPORARY TABLE analytics AS SELECT st.state , s.uid, pid, SUM(s.quantity*s.price) FROM sales s INNER JOIN (SELECT users.id, users.state FROM users ORDER BY users.state ASC ) As st ON s.uid = st.id GROUP BY st.state, s.pid, s.uid ORDER BY st.state, s.pid");
             stmt.execute("CREATE INDEX state_index ON analytics (state)");
             
             Statement statestmt = conn.createStatement();
@@ -196,19 +209,40 @@ if(session.getAttribute("name")!=null)
             out.println("<tr><td></td>");
             ArrayList<Integer> pids = new ArrayList<Integer>();
             
+            
+            PreparedStatement pst = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics join (SELECT id FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ?) AS foo ON analytics.uid = foo.id WHERE analytics.pid = ?");
+            pst.setInt(1, ageArr[0]);
+            pst.setInt(2, ageArr[1]);
+            pst.setString(3, state);
             while(rs.next()) { 
-                out.println("<td><b>"+rs.getString("name")+"</b></td>");
+            	pst.setInt(4, rs.getInt("id"));
+            	ResultSet foo = pst.executeQuery();
+            	int total = 0;
+            	if( foo.next()) {
+            		total = foo.getInt("total");
+            	}
+                out.println("<td><b>"+rs.getString("name")+ " ($" + total + ")" + "</b></td>");
                 pids.add(rs.getInt("id"));
             }
             
             out.println("</tr>");
-            pstmt = conn.prepareStatement("SELECT sum FROM analytics WHERE state = ? AND pid = ?");
+            pstmt = conn.prepareStatement("SELECT sum FROM analytics JOIN (SELECT id FROM users WHERE age >= ? AND age < ?) AS foo ON analytics.uid = foo.id WHERE state = ? AND pid = ?");
+			pstmt.setInt(1, ageArr[0]);
+			pstmt.setInt(2, ageArr[1]);
             while (states.next()) {
+            	PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics JOIN (SELECT products.id FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid) AS s ON s.id = analytics.pid WHERE state LIKE ?");
+            	pstmt2.setString(1, request.getParameter("categoryFilter"));
+            	pstmt2.setString(2, states.getString("state"));
+            	
+            	ResultSet rs2 = pstmt2.executeQuery();
+            	rs2.next();
+            	
+            	
                 out.println("<tr>");
-                out.println("<td><b>" + states.getString("state") + "</b></td>");
+                out.println("<td><b>" + states.getString("state") + "($" + rs2.getInt("total") + ")" + "</b></td>");
                 for (Integer pid : pids ) {
-                    pstmt.setString(1, states.getString("state"));
-                    pstmt.setInt(2, pid);
+                    pstmt.setString(3, states.getString("state"));
+                    pstmt.setInt(4, pid);
                     rs = pstmt.executeQuery();
                     if ( !(rs.next()))
                         out.println("<td>0</td>");
@@ -220,14 +254,13 @@ if(session.getAttribute("name")!=null)
 		}
 		conn.close();
 		double end = System.nanoTime();
-		out.println("<h2>" + ((end - start) / 1000000000.0 )+ "</h2>");
+		out.println("<h2>" + ((end - start) / 1000000000.0 ) + " seconds" + "</h2>");
 	}
 	else { // Action was null so analytics page was just started
 		rowCnt = 20; // initialize these vars so that the buttons will show on the page just
 		colCnt = 10; // starting up
 	}
 	%>
-	<%= rowCnt %>
 	<%
 	if (session.getAttribute("nofilter") == null || session.getAttribute("nofilter").toString().equals("false")) 
 	{
