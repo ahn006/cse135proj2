@@ -68,103 +68,59 @@ if(session.getAttribute("name")!=null)
 		<%
 		if (request.getParameter("rows").equals("customers")) {
 			stmt = conn.createStatement();
-			stmt.execute("DROP TABLE IF EXISTS analytics");
-			stmt.execute("CREATE TEMPORARY TABLE analytics AS SELECT uid , pid, SUM(s.quantity*s.price) FROM sales s GROUP BY s.uid, s.pid ORDER BY s.uid, s.pid");
-			stmt.execute("CREATE INDEX uid_index ON analytics (uid)");
-			
-			Statement userstmt = conn.createStatement();
-			ResultSet users = null;
-			PreparedStatement pStat = conn.prepareStatement("SELECT id, name FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ? ORDER BY name ASC LIMIT 20 OFFSET " + session.getAttribute("rowOffset")); 
-			
-			int nextOffset = Integer.parseInt(session.getAttribute("rowOffset").toString()) + 20;
-			PreparedStatement pStat2 = conn.prepareStatement("SELECT id, name FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ? ORDER BY name ASC LIMIT 20 OFFSET " + nextOffset); 
-			
-			pStat.setInt(1, ageArr[0]);
-			pStat.setInt(2, ageArr[1]);
-			pStat.setString(3, state);
-
-			pStat2.setInt(1, ageArr[0]);
-			pStat2.setInt(2, ageArr[1]);
-			pStat2.setString(3, state);
-			
-			users = pStat.executeQuery();
-			
-			
-			
-			PreparedStatement pro = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + session.getAttribute("colOffset"));
-			pro.setString(1, request.getParameter("categoryFilter"));
-			rs = pro.executeQuery();
-
-            int temp = (Integer.parseInt(session.getAttribute("colOffset").toString()) + 10);
-
-			PreparedStatement pro2 = conn.prepareStatement("SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + temp);
-			pro2.setString(1, request.getParameter("categoryFilter"));
-			ResultSet nextPro = pro2.executeQuery();
-			
-
-			Statement stmt2 = conn.createStatement();
-            ResultSet nextCus = pStat2.executeQuery();
-            while(nextCus.next()) {
-            	rowCnt++;
+			//get offsets
+			int rowOffset = Integer.parseInt(session.getAttribute("rowOffset").toString());
+            int colOffset = (Integer.parseInt(session.getAttribute("colOffset").toString()));
+            //create the queries
+            String userQuery = "SELECT id, name FROM users WHERE age >= ? AND age < ? AND state LIKE ? ORDER BY name ASC LIMIT 20 OFFSET " + rowOffset;
+            String prodQuery = "SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + colOffset;
+			String allQuery = "SELECT SUM(quantity* sales.price) AS total, SelectedProducts.name, SelectedUsers.name " +
+			        " FROM sales " +
+			        " RIGHT OUTER JOIN (" + prodQuery + ") As SelectedProducts ON sales.pid = SelectedProducts.id " + 
+			        " INNER JOIN (" + userQuery + ") As SelectedUsers ON SelectedUsers.id = sales.uid " +
+			        " GROUP BY SelectedProducts.name, SelectedUsers.name " + 
+			        " ORDER BY SelectedUsers.name";
+			//execute queries
+			//All query
+		    pstmt = conn.prepareStatement(allQuery);
+		    pstmt.setString(1, request.getParameter("categoryFilter"));
+		    pstmt.setInt(2, ageArr[0]);
+		    pstmt.setInt(3, ageArr[1]);
+		    pstmt.setString(4, state);
+		    ResultSet allResults = pstmt.executeQuery();
+		    
+		    //User query
+		    pstmt = conn.prepareStatement(userQuery);
+		    pstmt.setInt(1, ageArr[0]);
+            pstmt.setInt(2, ageArr[1]);
+            pstmt.setString(3, state);
+            ResultSet userResults = pstmt.executeQuery();
+		    //Product query
+		    pstmt = conn.prepareStatement(prodQuery);
+		    pstmt.setString(1, request.getParameter("categoryFilter"));
+            ResultSet prodResults = pstmt.executeQuery();
+            
+            String[] products = new String[10];
+            out.println("<table>");
+            out.println("<tr>");
+            out.println("<td></td>");
+            
+            int i = 0;
+            //print out the column header with the product names and stores the product names in an array
+            while(prodResults.next()) {
+                out.println("<td>" + prodResults.getString("name") + "</td>");
+                products[i++] = prodResults.getString("name");
             }
-            
-  
-            while(nextPro.next()) {
-            	colCnt++;
-            }
-            nextCus.close();
-            nextPro.close();
-            
-            
-            
-            out.println("<table>");            
-            out.println("<tr><td></td>");
-            ArrayList<Integer> pids = new ArrayList<Integer>();
-
-            PreparedStatement pst = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics join (SELECT id FROM users WHERE users.age >= ? AND users.age < ? AND state LIKE ?) AS foo ON analytics.uid = foo.id WHERE analytics.pid = ?");
-            pst.setInt(1, ageArr[0]);
-            pst.setInt(2, ageArr[1]);
-            pst.setString(3, state);
-            while(rs.next()) { 
-            	pst.setInt(4, rs.getInt("id"));
-            	ResultSet foo = pst.executeQuery();
-            	int total = 0;
-            	if(foo.next()) {
-            		total = foo.getInt("total");
-            	}
-                out.println("<td><b>"+rs.getString("name")+ " ($" + total + ")" + "</b></td>");
-                pids.add(rs.getInt("id"));
-            }
-            
             out.println("</tr>");
-            pstmt = conn.prepareStatement("SELECT sum FROM analytics WHERE uid = ? AND pid = ?");
             
-            
-            
-            while (users.next()) {
-            	PreparedStatement pstmt2 = conn.prepareStatement("SELECT SUM(sum) as total FROM analytics JOIN (SELECT products.id FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid) AS s ON s.id = analytics.pid WHERE uid = ?");
-            	pstmt2.setString(1, request.getParameter("categoryFilter"));
-            	pstmt2.setInt(2, users.getInt("id"));
-            	
-            	ResultSet rs2 = pstmt2.executeQuery();
-            	rs2.next();
+            //for each users, prints out a row with the product totals
+            while(userResults.next()) {
                 out.println("<tr>");
-                out.println("<td><b>" + users.getString("name") + "($" + rs2.getInt("total") + ")" + "</b></td>");
-             
-                for (Integer pid : pids ) {
-                	pstmt.setInt(1, users.getInt("id"));
-                	pstmt.setInt(2, pid);
-                	rs = pstmt.executeQuery();
-                	if ( !(rs.next()))
-                		out.println("<td>0</td>");
-                	else
-                		out.println("<td>" + rs.getInt("sum") + "</td>");
-      
-                }
+                out.println("<td>" + userResults.getString("name") + "</td>");
+                //print out total of each product for the user
                 out.println("</tr>");
-                
             }
-            out.println("</table>");
+            out.println("</table>");        
 		}
 		else if ( request.getParameter("rows").equals("states")) {
 			stmt = conn.createStatement();
