@@ -74,7 +74,7 @@ if(session.getAttribute("name")!=null)
             //create the queries
             String userQuery = "SELECT id, name FROM users WHERE age >= ? AND age < ? AND state LIKE ? ORDER BY name ASC LIMIT 20 OFFSET " + rowOffset;
             String prodQuery = "SELECT products.id, products.name FROM products, categories WHERE categories.name LIKE ? AND categories.id = products.cid ORDER BY name ASC LIMIT 10 OFFSET " + colOffset;
-			String allQuery = "SELECT SUM(quantity* sales.price) AS total, SelectedProducts.name, SelectedUsers.name " +
+			String allQuery = "SELECT SUM(quantity* sales.price) AS total, SelectedProducts.name AS pName, SelectedUsers.name AS uName " +
 			        " FROM sales " +
 			        " RIGHT OUTER JOIN (" + prodQuery + ") As SelectedProducts ON sales.pid = SelectedProducts.id " + 
 			        " INNER JOIN (" + userQuery + ") As SelectedUsers ON SelectedUsers.id = sales.uid " +
@@ -113,12 +113,56 @@ if(session.getAttribute("name")!=null)
             }
             out.println("</tr>");
             
+            int[] totalsArray = new int[20];
+            String[] uNameArray = new String[20];
+            String[] pNameArray = new String[20];
+            i = 0;
+            
+            while( allResults.next()) {
+				uNameArray[i] = allResults.getString("uName");
+				pNameArray[i] = allResults.getString("pName");
+				totalsArray[i] = allResults.getInt("total");
+				i++;
+            }
+            
+            int[][] totalsMatrix = new int[20][10];
+            for( i = 0; i < 20;) {
+            	for( int j = 0; j < 10; j++ ) {
+            		if( pNameArray[i].equals(products[j]) ) {
+            			totalsMatrix[i][j] = totalsArray[i];
+            			i++;
+            			if( i >= 20) {
+            				break;
+            			}
+            			if( !uNameArray[i].equals(uNameArray[i-1]) ) {
+            				break;
+            			}
+            		}
+            		if( j == 9) {
+            			i++;
+            		}
+            	}
+            }
+            
             //for each users, prints out a row with the product totals
+            i = 0;
             while(userResults.next()) {
                 out.println("<tr>");
                 out.println("<td>" + userResults.getString("name") + "</td>");
                 //print out total of each product for the user
+                if( userResults.getString("name").equals(uNameArray[i]) ) {
+	          		for(int j = 0; j < 10; j++) {
+	          			out.println("<td>" + totalsMatrix[i][j] + "</td>");
+	          		}
+	          		i++;
+                }
+                else {
+                	for( int j = 0; j < 10; j++ ) {
+                		out.println("<td>0</td>");
+                	}
+                }
                 out.println("</tr>");
+           
             }
             out.println("</table>");        
 		}
