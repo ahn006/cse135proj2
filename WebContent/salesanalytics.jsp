@@ -15,7 +15,7 @@
 <%
 
 double start = System.nanoTime();
-int[] ageArr = {0, 125}; //new int[2];
+int[] ageArr = {0, 125};
 if(request.getParameter("ageFilter") != null) {
 	String[] temp = request.getParameter("ageFilter").split("-");
 	ageArr[0] = Integer.parseInt(temp[0]);
@@ -33,7 +33,6 @@ if(session.getAttribute("rowOffset") == null ) {
 	session.setAttribute("rowOffset", 0);
 }
 if(request.getParameter("rowOffset") != null ) {	
-	//String current = (session.getAttribute("rowOffset")).toString();
 	int temp = Integer.parseInt(request.getParameter("rowOffset"));
 	if ( Integer.parseInt(request.getParameter("rowOffset")) == 0) {
 		session.setAttribute("rowOffset", 0 );
@@ -46,7 +45,6 @@ if(session.getAttribute("colOffset") == null ) {
 	session.setAttribute("colOffset", 0);
 }
 if(request.getParameter("colOffset") != null ) {
-	//String current = (session.getAttribute("colOffset")).toString();
 	int temp = Integer.parseInt(request.getParameter("colOffset"));
 	if ( Integer.parseInt(request.getParameter("colOffset")) == 0) {
 		session.setAttribute("colOffset", 0 );
