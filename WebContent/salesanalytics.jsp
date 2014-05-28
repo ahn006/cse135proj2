@@ -33,24 +33,26 @@ if(session.getAttribute("rowOffset") == null ) {
 	session.setAttribute("rowOffset", 0);
 }
 if(request.getParameter("rowOffset") != null ) {	
-	String current = (session.getAttribute("rowOffset")).toString();
+	//String current = (session.getAttribute("rowOffset")).toString();
+	int temp = Integer.parseInt(request.getParameter("rowOffset"));
 	if ( Integer.parseInt(request.getParameter("rowOffset")) == 0) {
 		session.setAttribute("rowOffset", 0 );
 	}
 	else {
-		session.setAttribute("rowOffset", Integer.parseInt(current) + 20 );
+		session.setAttribute("rowOffset", temp );
 	}
 }
 if(session.getAttribute("colOffset") == null ) {
 	session.setAttribute("colOffset", 0);
 }
 if(request.getParameter("colOffset") != null ) {
-	String current = (session.getAttribute("colOffset")).toString();
+	//String current = (session.getAttribute("colOffset")).toString();
+	int temp = Integer.parseInt(request.getParameter("colOffset"));
 	if ( Integer.parseInt(request.getParameter("colOffset")) == 0) {
 		session.setAttribute("colOffset", 0 );
 	}
 	else {
-		session.setAttribute("colOffset", Integer.parseInt(current) + 10 );
+		session.setAttribute("colOffset", temp );
 	}
 }
 int rowCnt = 0;
@@ -301,8 +303,9 @@ if(session.getAttribute("name")!=null)
 	</form>
 	
 	<%
-	//session.setAttribute("ageFilter", null);
+	
 	}
+	session.setAttribute("ageFilter", null);
 	session.setAttribute("nofilter", null);
 	if (rowCnt > 0) {
 	%>
@@ -319,10 +322,11 @@ if(session.getAttribute("name")!=null)
 		}
 		session.setAttribute("ageFilter", null);
 		%>
-		<button name="rowOffset" value=20>Next 20 customers</button>
+		<button name="rowOffset" value=<%= Integer.parseInt(session.getAttribute("rowOffset").toString()) + 20 %>>Next 20 customers</button>
 	</form>
 	<%
 	}
+	session.setAttribute("rowOffset", null);
 	if (colCnt > 0) {
 	%>
 	<form method="post">
@@ -331,11 +335,11 @@ if(session.getAttribute("name")!=null)
 		<input type="hidden" name="ageFilter" value="<%= request.getParameter("ageFilter") %>" />
 		<input type="hidden" name="categoryFilter" value="<%= request.getParameter("categoryFilter") %>" />
 		<input type="hidden" name="stateFilter" value="<%= request.getParameter("stateFilter") %>" />
-		<button name="colOffset" value=10>Next 10 products</button>
+		<button name="colOffset" value=<%= Integer.parseInt(session.getAttribute("colOffset").toString()) + 10 %>>Next 10 products</button>
 	</form>
 	<%
 	}
-
+	session.setAttribute("colOffset", null);
 }
 else
 {
